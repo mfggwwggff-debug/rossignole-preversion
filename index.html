@@ -3,16 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Domaine de la Rossignole — Gestion des commandes (préversion)</title>
-<meta name="theme-color" content="#3b1219">
+<title>Cherrier Frères — Logistique des commandes (préversion)</title>
+<meta name="theme-color" content="#FFFFFF">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <style>
 :root{
-  --bg:#f6f2ea; --paper:#fffdf8; --ink:#231c18; --muted:#6f655c; --line:#e3dacb;
-  --wine:#7a1f2b; --wine-d:#3b1219; --gold:#b08a3e; --green:#2e6b3f; --orange:#b4531f; --red:#b3261e;
+  --bg:#F6F5F1; --paper:#FFFFFF; --ink:#1C1D1A; --muted:#5F625A; --line:#E3E1DA;
+  --wine:#7A4E2D; --wine-d:#5C3920; --soft:#F3E9DF; --gold:#D9A57A; --green:#1E6B33; --orange:#8A5300; --red:#A3261B;
   --blanc:#e2d48a; --rouge:#7a1f2b; --rose:#e8a3a0;
   --r:10px; --shadow:0 1px 2px rgba(40,20,10,.06),0 4px 14px rgba(40,20,10,.06);
-  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
-  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --serif:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --sans:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
@@ -20,31 +21,33 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:15p
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 a{color:var(--wine)}
-h1,h2,h3{font-family:var(--serif);font-weight:600;margin:0}
+h1,h2,h3{font-family:var(--sans);font-weight:700;letter-spacing:-.01em;margin:0}
 
 /* Barre du haut */
-#top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:14px;padding:10px 18px;background:var(--wine-d);color:#f4e9dc}
+#top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:14px;padding:10px 24px;background:#fff;color:var(--ink);border-bottom:1px solid var(--line)}
 #top .brand{display:flex;align-items:center;gap:10px;min-width:0}
-#top .brand b{font-family:var(--serif);font-size:18px;white-space:nowrap}
-#top .brand small{opacity:.7;font-size:12px;white-space:nowrap}
+#top .brand b{font-size:17px;white-space:nowrap}
+.brandlogo{height:40px;width:auto;display:block}
+#top .brand .sep{padding-left:14px;border-left:1px solid var(--line);font-size:13px;color:var(--muted);line-height:1.3}
+#top .brand small{font-size:12px;white-space:nowrap}
 .logo{width:30px;height:30px;flex:none}
-#views{display:flex;gap:4px;margin-left:auto;background:rgba(255,255,255,.08);padding:4px;border-radius:999px}
-#views button{border:0;background:transparent;color:#f4e9dc;padding:7px 14px;border-radius:999px;font-weight:500;white-space:nowrap}
-#views button.on{background:#f4e9dc;color:var(--wine-d)}
-#sync{display:flex;align-items:center;gap:6px;font-size:12px;opacity:.85;white-space:nowrap}
+#views{display:flex;gap:4px;margin-left:auto;background:var(--bg);border:1px solid var(--line);padding:4px;border-radius:999px}
+#views button{border:0;background:transparent;color:#3D3F3A;padding:7px 14px;border-radius:999px;font-weight:500;white-space:nowrap}
+#views button.on{background:var(--wine);color:#fff}
+#sync{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);white-space:nowrap}
 #sync i{width:9px;height:9px;border-radius:50%;background:#999;display:inline-block}
 #sync.ok i{background:#5cc77a;box-shadow:0 0 0 3px rgba(92,199,122,.25)}
 #sync.wait i{background:#e2b33c}
 #sync.off i{background:#e0605a}
 @media (max-width:820px){#top{flex-wrap:wrap;padding:8px 12px}#top .brand small{display:none}#views{order:3;width:100%;margin:0;justify-content:space-between}#views button{flex:1;padding:7px 6px}}
 
-.badge{display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;color:#fff;white-space:nowrap}
-.chip{display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border-radius:6px;font-size:12.5px;background:#efe7da;white-space:nowrap}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;color:#fff;white-space:nowrap}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border-radius:6px;font-size:12.5px;background:var(--soft);white-space:nowrap}
 .dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none;border:1px solid rgba(0,0,0,.15)}
-.btn{border:1px solid var(--line);background:var(--paper);padding:8px 14px;border-radius:8px;font-weight:500}
+.btn{border:1px solid #CFCCC3;background:var(--paper);padding:9px 16px;border-radius:8px;font-weight:500}
 .btn:hover{border-color:#cdbfa8}
 .btn.p{background:var(--wine);border-color:var(--wine);color:#fff}
-.btn.p:hover{background:#681924}
+.btn.p:hover{background:var(--wine-d)}
 .btn.g{background:var(--green);border-color:var(--green);color:#fff}
 .btn.s{padding:5px 10px;font-size:13px}
 .btn:disabled{opacity:.45;cursor:not-allowed}
@@ -64,8 +67,9 @@ input[type=number]{width:90px}
 .hero{display:grid;grid-template-columns:1.3fr 1fr;gap:28px;align-items:center;margin-bottom:34px}
 .hero h1{font-size:38px;line-height:1.1;color:var(--wine-d)}
 .hero .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;color:var(--gold);font-weight:700;margin-bottom:10px}
-.hero p{font-size:17px;color:#4a3f37}
-.tag{display:inline-block;background:#f1e3c4;color:#6b4e12;border-radius:6px;padding:3px 9px;font-size:13px;font-weight:600}
+.hero p{font-size:17px;color:#3D3F3A}
+.heroimg{display:flex;align-items:flex-end;gap:10px;margin-bottom:14px}.heroimg img{height:120px;width:auto}.heroimg:empty{display:none}
+.tag{display:inline-block;background:#FBEFD9;color:#6E4300;border-radius:6px;padding:3px 9px;font-size:13px;font-weight:600}
 .flow{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin:14px 0 6px}
 .flow div{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 10px;position:relative;font-size:13.5px}
 .flow div b{display:flex;width:26px;height:26px;border-radius:50%;background:var(--wine);color:#fff;align-items:center;justify-content:center;font-size:13px;margin-bottom:8px}
@@ -78,24 +82,24 @@ input[type=number]{width:90px}
 @media (max-width:820px){.supports{grid-template-columns:1fr}}
 .sup{padding:18px;display:flex;flex-direction:column;gap:10px}
 .sup h3{font-size:20px}
-.sup .ill{height:118px;border-radius:8px;background:#efe7da;display:flex;align-items:center;justify-content:center}
-.sup ul{margin:0;padding-left:18px;color:#4a3f37;font-size:14px}
+.sup .ill{height:118px;border-radius:8px;background:var(--soft);display:flex;align-items:center;justify-content:center}
+.sup ul{margin:0;padding-left:18px;color:#3D3F3A;font-size:14px}
 .how{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-top:14px}
 @media (max-width:820px){.how{grid-template-columns:1fr}}
 .how ol{margin:0;padding-left:20px}
 .how ol li{margin:6px 0}
 .share{padding:18px;display:flex;gap:16px;align-items:center}
 .share img{width:150px;height:150px;border-radius:6px;background:#fff;flex:none}
-.linkbox{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#f3ede3;border-radius:6px;padding:7px 9px;word-break:break-all;margin:8px 0}
-.notin{columns:2;font-size:14px;color:#4a3f37}
+.linkbox{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#F1F0EC;border-radius:6px;padding:7px 9px;word-break:break-all;margin:8px 0}
+.notin{columns:2;font-size:14px;color:#3D3F3A}
 @media (max-width:700px){.notin{columns:1}}
 
 /* ---------- Ordinateur ---------- */
 .pc{display:grid;grid-template-columns:210px minmax(0,1fr);min-height:calc(100vh - 54px)}
-.side{background:#efe7da;border-right:1px solid var(--line);padding:14px 10px;display:flex;flex-direction:column;gap:3px}
+.side{background:#fff;border-right:1px solid var(--line);padding:14px 10px;display:flex;flex-direction:column;gap:3px}
 .side button{display:flex;align-items:center;gap:10px;border:0;background:transparent;padding:10px 12px;border-radius:8px;text-align:left;font-weight:500}
-.side button:hover{background:#e6dccb}
-.side button.on{background:var(--paper);box-shadow:var(--shadow);color:var(--wine)}
+.side button:hover{background:#EEE5DA}
+.side button.on{background:var(--soft);color:var(--wine-d);font-weight:600}
 .side .n{margin-left:auto;background:var(--wine);color:#fff;border-radius:999px;font-size:11.5px;padding:1px 7px}
 .side .foot{margin-top:auto;font-size:12px;color:var(--muted);padding:8px 10px}
 .pcmain{padding:18px 22px;min-width:0}
@@ -107,8 +111,8 @@ input[type=number]{width:90px}
 .list{overflow:hidden}
 .li{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:transparent;padding:11px 14px}
 .li:last-child{border-bottom:0}
-.li:hover{background:#faf5ec}
-.li.on{background:#f5ead9;box-shadow:inset 3px 0 0 var(--wine)}
+.li:hover{background:#FAF8F4}
+.li.on{background:var(--soft);box-shadow:inset 3px 0 0 var(--wine)}
 .li .l1{display:flex;gap:8px;align-items:center}
 .li .l1 b{font-weight:600}
 .li .l2{font-size:13px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -116,34 +120,34 @@ input[type=number]{width:90px}
 .unread .l1::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--wine);flex:none}
 .pane{padding:18px 20px;min-width:0}
 .pane select{max-width:100%;width:100%}
-.mailbody{white-space:pre-wrap;background:#fbf8f2;border:1px solid var(--line);border-radius:8px;padding:14px;font-size:14.5px;margin:12px 0}
+.mailbody{white-space:pre-wrap;background:#FAF9F6;border:1px solid var(--line);border-radius:8px;padding:14px;font-size:14.5px;margin:12px 0}
 table.t{width:100%;border-collapse:collapse;font-size:14px}
 table.t th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;padding:8px 8px;border-bottom:1px solid var(--line)}
-table.t td{padding:8px;border-bottom:1px solid #efe8dc;vertical-align:middle}
+table.t td{padding:8px;border-bottom:1px solid #EEEDE8;vertical-align:middle}
 table.t tr:last-child td{border-bottom:0}
 .num{text-align:right;font-variant-numeric:tabular-nums}
 .filters{display:flex;gap:6px;flex-wrap:wrap}
 .filters button{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 12px;font-size:13px}
-.filters button.on{background:var(--wine-d);color:#fff;border-color:var(--wine-d)}
+.filters button.on{background:var(--soft);color:var(--wine-d);border-color:var(--wine);font-weight:600}
 .stepper{display:flex;gap:0;margin:14px 0 4px;overflow-x:auto}
 .stepper div{flex:1;min-width:92px;font-size:11.5px;color:var(--muted);position:relative;padding-top:16px;text-align:center}
 .stepper div::before{content:"";position:absolute;top:5px;left:0;right:0;height:3px;background:var(--line)}
 .stepper div::after{content:"";position:absolute;top:0;left:50%;margin-left:-6px;width:12px;height:12px;border-radius:50%;background:var(--line)}
 .stepper div.done::before,.stepper div.done::after{background:var(--green)}
 .stepper div.cur{color:var(--ink);font-weight:600}
-.stepper div.cur::after{background:var(--wine);box-shadow:0 0 0 4px rgba(122,31,43,.18)}
-.box{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:#fbf8f2;margin-top:12px}
+.stepper div.cur::after{background:var(--wine);box-shadow:0 0 0 4px rgba(122,78,45,.18)}
+.box{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:#FAF9F6;margin-top:12px}
 .box.alert{background:#fdf0ee;border-color:#efc4be}
 .box.warn{background:#fdf5e8;border-color:#efd5ae}
 .box h4{margin:0 0 6px;font-size:14px}
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
 .hist{font-size:13px;color:var(--muted);margin:0;padding-left:16px}
-.bar{height:8px;background:#ece4d6;border-radius:999px;overflow:hidden}
+.bar{height:8px;background:#ECEBE6;border-radius:999px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--green)}
 .empty{padding:40px;text-align:center;color:var(--muted)}
 
 /* ---------- Tablette ---------- */
-.tab{display:grid;grid-template-columns:340px 1fr;gap:0;min-height:calc(100vh - 54px);background:#ece5d8}
+.tab{display:grid;grid-template-columns:340px 1fr;gap:0;min-height:calc(100vh - 54px);background:#EEEDE8}
 .tlist{padding:14px;display:flex;flex-direction:column;gap:10px;border-right:1px solid var(--line);overflow:auto}
 .tlist h3{font-family:var(--sans);font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:8px 4px 0}
 .tcard{border:2px solid transparent;background:var(--paper);border-radius:12px;padding:14px;text-align:left;box-shadow:var(--shadow);min-height:64px}
@@ -172,29 +176,32 @@ table.t tr:last-child td{border-bottom:0}
 @media (max-width:860px){.tab{grid-template-columns:1fr}.tlist{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line)}.tlist h3{display:none}.tcard{min-width:220px}}
 
 /* ---------- TV ---------- */
-.tv{background:#17110f;color:#f3ebe0;min-height:100vh;padding:2.2vh 2.2vw;display:flex;flex-direction:column;gap:2vh;font-size:1.25vw}
+.tv{background:#141512;color:#F5F2EC;min-height:100vh;padding:2.2vh 2.2vw;display:flex;flex-direction:column;gap:2vh;font-size:1.25vw}
 .tvhead{display:flex;align-items:center;gap:2vw}
-.tvhead h1{font-size:2.4vw;color:#f3ebe0}
-.tvhead .sub{color:#bba98f;font-size:1.2vw}
+.tvhead h1{font-size:2.3vw;color:#F5F2EC;padding-left:1.4vw;border-left:2px solid #34372F}
+.tvlogo{height:4.6vw;width:auto}
+.tvhead .sub{color:#B5B2A8;font-size:1.2vw}
 .tvclock{margin-left:auto;text-align:right}
 .tvclock b{font-size:3.4vw;font-variant-numeric:tabular-nums;font-weight:600;display:block;line-height:1}
-.tvclock span{color:#bba98f;font-size:1.2vw}
+.tvclock span{color:#B5B2A8;font-size:1.2vw}
 .tvcols{display:grid;grid-template-columns:repeat(3,1fr);gap:1.6vw;flex:1;min-height:0}
-.tvcol{background:#221a17;border-radius:1vw;padding:1.2vw;display:flex;flex-direction:column;gap:1vw;min-height:0;overflow:hidden}
+.tvcol{background:#1A1C18;border-radius:1vw;padding:1.2vw;display:flex;flex-direction:column;gap:1vw;min-height:0;overflow:hidden}
 .tvcol h2{font-family:var(--sans);font-size:1.5vw;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:.8vw}
-.tvcol h2 .k{margin-left:auto;background:#3a2c27;border-radius:999px;padding:.1vw 1vw;font-size:1.4vw}
-.tvcard{background:#2e2420;border-radius:.8vw;padding:1vw 1.2vw;border-left:.5vw solid #7a1f2b}
+.tvcol h2 .k{margin-left:auto;background:#2B2E28;border-radius:999px;padding:.1vw 1vw;font-size:1.4vw}
+.tvcard{background:#1F211D;border-radius:.8vw;padding:1vw 1.2vw;border-left:.5vw solid #7a1f2b}
 .tvcard .a{display:flex;align-items:baseline;gap:1vw}
 .tvcard .a b{font-size:2vw;font-family:var(--serif)}
 .tvcard .a span{min-width:0;flex:1;font-size:1.6vw;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tvcard .bdg{flex:none;margin-left:auto;font-size:1vw;background:#b3261e;border-radius:999px;padding:.15vw .8vw;font-weight:700;white-space:nowrap}
-.tvcard .d{color:#cbbba3;margin-top:.4vw;font-size:1.15vw}
-.tvcard .ln{font-size:1.15vw;margin-top:.3vw;color:#e9ddcc}
-.tvbar{height:.6vw;background:#3a2c27;border-radius:999px;overflow:hidden;margin-top:.6vw}
+.tvcard .d{color:#B5B2A8;margin-top:.4vw;font-size:1.15vw}
+.tvcard .ln{font-size:1.15vw;margin-top:.3vw;color:#E6E3DB}
+.tvl{display:flex;align-items:center;gap:.8vw}.tvl small{color:#B5B2A8;font-size:1vw}.tvl .dot{width:1vw!important;height:1vw!important}
+.btl{width:auto;flex:none;object-fit:contain}
+.tvbar{height:.6vw;background:#2B2E28;border-radius:999px;overflow:hidden;margin-top:.6vw}
 .tvbar i{display:block;height:100%;background:#6fcf8a}
-.tvfoot{display:flex;gap:2vw;color:#bba98f;font-size:1.1vw;white-space:nowrap;overflow:hidden;border-top:1px solid #3a2c27;padding-top:1vh}
-.tvfoot b{color:#f3ebe0;font-weight:600}
-.tvempty{color:#7d6d5d;font-size:1.3vw;padding:1vw}
+.tvfoot{display:flex;gap:2vw;color:#B5B2A8;font-size:1.1vw;white-space:nowrap;overflow:hidden;border-top:1px solid #2B2E28;padding-top:1vh}
+.tvfoot b{color:#F5F2EC;font-weight:600}
+.tvempty{color:#6F7268;font-size:1.3vw;padding:1vw}
 .flash{animation:flash 2.4s ease-out}
 @keyframes flash{0%{box-shadow:0 0 0 .4vw #e2b33c;transform:scale(1.02)}100%{box-shadow:0 0 0 0 transparent;transform:none}}
 body.tvmode #top{position:fixed;left:0;right:0;transform:translateY(-100%);transition:transform .3s}
@@ -215,8 +222,8 @@ body.tvmode.showtop #top{transform:none}
 <body>
 <header id="top">
   <div class="brand">
-    <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="#f4e9dc"/><path d="M16 6c-2 4-6 6-6 11a6 6 0 0 0 12 0c0-5-4-7-6-11z" fill="#7a1f2b"/><path d="M16 23v4M12 27h8" stroke="#7a1f2b" stroke-width="1.6" stroke-linecap="round"/></svg>
-    <div><b>Domaine de la Rossignole</b><br><small>Gestion des commandes · préversion d'essai</small></div>
+    <img class="brandlogo" src="img/logo.png" alt="Cherrier Frères" onerror="this.replaceWith(Object.assign(document.createElement('b'),{textContent:'Cherrier Frères'}))">
+    <div class="sep">Logistique des commandes<br><small>préversion d'essai</small></div>
   </div>
   <nav id="views">
     <button data-view="pres">Présentation</button>
@@ -267,23 +274,23 @@ function SEED() {
   return {
     nextNum: 1046,
     cuvees: [
-      { id: "c1", nom: "Sancerre blanc « Tradition »", mill: 2024, coul: "blanc", stock: 1800, res: 360, kg: 1.3 },
-      { id: "c2", nom: "Sancerre blanc « Vieilles Vignes »", mill: 2023, coul: "blanc", stock: 300, res: 96, kg: 1.3 },
-      { id: "c3", nom: "Sancerre blanc « Prestige »", mill: 2022, coul: "blanc", stock: 240, res: 48, kg: 1.35 },
-      { id: "c4", nom: "Sancerre rouge", mill: 2023, coul: "rouge", stock: 720, res: 120, kg: 1.3 },
-      { id: "c5", nom: "Sancerre rosé", mill: 2024, coul: "rose", stock: 600, res: 120, kg: 1.3 },
-      { id: "c6", nom: "Menetou-Salon blanc", mill: 2024, coul: "blanc", stock: 1200, res: 240, kg: 1.3 },
-      { id: "c7", nom: "Menetou-Salon rouge", mill: 2023, coul: "rouge", stock: 480, res: 96, kg: 1.3 },
+      { id: "c1", nom: "Sancerre blanc", mill: 2025, coul: "blanc", stock: 1800, res: 360, kg: 1.3 },
+      { id: "c2", nom: "Sancerre blanc « Nuit d’Hector »", mill: 2022, coul: "blanc", stock: 300, res: 96, kg: 1.3 },
+      { id: "c3", nom: "Sancerre blanc « L’Essentiel »", mill: 2025, coul: "blanc", stock: 240, res: 48, kg: 1.35 },
+      { id: "c4", nom: "Sancerre rouge « Grand Picot »", mill: 2023, coul: "rouge", stock: 720, res: 120, kg: 1.3 },
+      { id: "c5", nom: "Sancerre rosé", mill: 2025, coul: "rose", stock: 600, res: 120, kg: 1.3 },
+      { id: "c6", nom: "Menetou-Salon blanc", mill: 2025, coul: "blanc", stock: 1200, res: 240, kg: 1.3 },
+      { id: "c7", nom: "Menetou-Salon rouge", mill: 2024, coul: "rouge", stock: 480, res: 96, kg: 1.3 },
       { id: "c8", nom: "Menetou-Salon rosé", mill: 2024, coul: "rose", stock: 360, res: 72, kg: 1.3 },
-      { id: "c9", nom: "Sancerre blanc « Tradition » Magnum", mill: 2023, coul: "blanc", stock: 90, res: 18, kg: 2.6 }
+      { id: "c9", nom: "Sancerre blanc Magnum", mill: 2024, coul: "blanc", stock: 90, res: 18, kg: 2.6 }
     ],
     habs: [
-      { id: "h1", nom: "Domaine — étiquette standard" },
-      { id: "h2", nom: "Domaine — export (mentions EN)" },
-      { id: "h3", nom: "Marque « Clos des Remparts »" },
-      { id: "h4", nom: "Marque distributeur « Caves Ligériennes »" },
-      { id: "h5", nom: "Le Bouchon — étiquette personnalisée" },
-      { id: "h6", nom: "Coffret cadeau" }
+      { id: "h1", nom: "Cherrier Frères" },
+      { id: "h2", nom: "Pierre Cherrier et Fils — export BE" },
+      { id: "h3", nom: "Domaine de la Rossignole" },
+      { id: "h4", nom: "Pierre Cherrier et Fils" },
+      { id: "h5", nom: "Domaine de la Rossignole — personnalisée restaurant" },
+      { id: "h6", nom: "Coffret cadeau Cherrier Frères" }
     ],
     clients: [
       { id: "k1", nom: "Cave des Remparts", ville: "Tours", email: "commandes@cave-remparts.example", hab: true, pro: true },
@@ -297,10 +304,10 @@ function SEED() {
     transp: ["Transporteur A — messagerie colis", "Transporteur B — palettes", "Transporteur C — export Benelux", "Enlèvement par le client"],
     mails: [
       { id: "m1", client: "k7", sujet: "Commande pour fin de mois", recu: ago(48), lu: false, traite: false, souhaitee: plusJ(7),
-        corps: "Bonjour,\n\nPour notre carte d'hiver, pourriez-vous nous préparer :\n- 120 bouteilles de Sancerre blanc Tradition 2024\n- 60 bouteilles de Sancerre rouge 2023\n\nEn cartons de 6 s'il vous plaît, pour une livraison avant le " + fmtD(plusJ(7)) + ".\n\nBien cordialement,\nLe sommelier — Hôtel du Lac",
+        corps: "Bonjour,\n\nPour notre carte d'hiver, pourriez-vous nous préparer :\n- 120 bouteilles de Sancerre blanc 2025\n- 60 bouteilles de Sancerre rouge Grand Picot 2023\n\nEn cartons de 6 s'il vous plaît, pour une livraison avant le " + fmtD(plusJ(7)) + ".\n\nBien cordialement,\nLe sommelier — Hôtel du Lac",
         lignes: [{ cuvee: "c1", hab: "h1", qte: 120, carton: 6 }, { cuvee: "c4", hab: "h1", qte: 60, carton: 6 }] },
-      { id: "m2", client: "k4", sujet: "Réassort Vieilles Vignes", recu: ago(95), lu: false, traite: false, souhaitee: plusJ(4),
-        corps: "Bonjour,\n\nLes Vieilles Vignes partent très bien, je voudrais 360 bouteilles (cartons de 12) et 60 bouteilles de Prestige en cartons de 6.\n\nMerci de me dire ce qui est possible.\n\nThomas — Vins & Co",
+      { id: "m2", client: "k4", sujet: "Réassort Nuit d’Hector", recu: ago(95), lu: false, traite: false, souhaitee: plusJ(4),
+        corps: "Bonjour,\n\nLes Nuit d’Hector partent très bien, je voudrais 360 bouteilles (cartons de 12) et 60 bouteilles de L’Essentiel en cartons de 6.\n\nMerci de me dire ce qui est possible.\n\nThomas — Vins & Co",
         lignes: [{ cuvee: "c2", hab: "h1", qte: 360, carton: 12 }, { cuvee: "c3", hab: "h1", qte: 60, carton: 6 }] },
       { id: "m3", client: "k6", sujet: "Vin pour une fête de famille", recu: ago(240), lu: true, traite: false, souhaitee: plusJ(10),
         corps: "Bonjour,\n\nNous fêtons les 60 ans de mon mari. Je souhaiterais 12 bouteilles de Menetou-Salon rouge et 6 bouteilles de rosé.\nJe peux passer les chercher au domaine.\n\nMerci beaucoup,\nCatherine Martin",
@@ -323,14 +330,14 @@ function mkOrder(id, num, client, statut, souhaitee, recu, lignes, notes, x = {}
 function normLine(l) { return { cuvee: l.cuvee, hab: l.hab || "h1", qte: +l.qte || 0, carton: +l.carton || 6, alloc: l.alloc != null ? +l.alloc : (+l.qte || 0), ce: false, et: false, ca: false, faits: 0 }; }
 
 const ST = {
-  nouvelle:   { lib: "Nouvelle — à vérifier", court: "Nouvelle", c: "#2f5d8a" },
-  attente:    { lib: "Réponse envoyée — attente du client", court: "Attente client", c: "#8a6d1f" },
-  etiquetage: { lib: "À étiqueter", court: "À étiqueter", c: "#7a1f2b" },
-  encours:    { lib: "En cours au conditionnement", court: "En cours", c: "#b4531f" },
-  prete:      { lib: "Prête — enlèvement à réserver", court: "Prête", c: "#2e6b3f" },
-  enlevement: { lib: "Enlèvement réservé", court: "Enlèvement réservé", c: "#1f6b6b" },
-  expediee:   { lib: "Expédiée — client notifié", court: "Expédiée", c: "#6f655c" },
-  annulee:    { lib: "Annulée", court: "Annulée", c: "#9a8f85" }
+  nouvelle:   { lib: "Reçue — à vérifier", court: "Reçue", c: "#3D3F3A", bg: "#ECEBE6" },
+  attente:    { lib: "Réponse envoyée — à confirmer par le client", court: "À confirmer", c: "#1F4E8C", bg: "#E3ECF8" },
+  etiquetage: { lib: "À étiqueter", court: "À étiqueter", c: "#7A4E2D", bg: "#F3E9DF" },
+  encours:    { lib: "En atelier", court: "En atelier", c: "#4F3590", bg: "#ECE7F7" },
+  prete:      { lib: "Prête — enlèvement à réserver", court: "Prête à enlever", c: "#1E6B33", bg: "#E1F0E3" },
+  enlevement: { lib: "Enlèvement réservé", court: "Enlèvement réservé", c: "#1E5F6B", bg: "#DFEFF1" },
+  expediee:   { lib: "Expédiée — client notifié", court: "Expédiée", c: "#5F625A", bg: "#ECEBE6" },
+  annulee:    { lib: "Annulée", court: "Annulée", c: "#8A8C85", bg: "#F1F0EC" }
 };
 const FLOW = ["nouvelle", "attente", "etiquetage", "encours", "prete", "enlevement", "expediee"];
 const RESERVE_ST = ["attente", "etiquetage", "encours", "prete", "enlevement"];
@@ -508,7 +515,9 @@ function render(force) {
 }
 document.addEventListener("focusout", () => setTimeout(() => { if (pendingRender) render(); }, 30));
 
-const badge = s => `<span class="badge" style="background:${ST[s].c}">${ST[s].court}</span>`;
+const badge = s => `<span class="badge" style="background:${ST[s].bg};color:${ST[s].c}">${ST[s].court}</span>`;
+const BTL = { blanc: "img/bouteille-blanc.png", rouge: "img/bouteille-rouge.png", rose: "img/bouteille-rose.png" };
+const btl = (cid, h) => `<img class="btl" src="${BTL[cuv(cid).coul]}" alt="" style="height:${h}" onerror="this.outerHTML='<span class=&quot;dot&quot; style=&quot;width:18px;height:18px;margin-top:4px;background:${COUL[cuv(cid).coul]}&quot;></span>'">`;
 const dot = cid => `<span class="dot" style="background:${COUL[cuv(cid).coul]}"></span>`;
 const cuvLib = cid => { const c = cuv(cid); return esc(c.nom) + " " + c.mill; };
 
@@ -519,7 +528,7 @@ function vPres() {
   return `<div class="pres">
   <section class="hero">
     <div>
-      <div class="kicker">Préversion d'essai · ${new Date().toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}</div>
+      <div class="kicker">Cherrier Frères · Domaine de la Rossignole · préversion d'essai</div>
       <h1>Un seul outil pour suivre chaque commande, du mail au camion.</h1>
       <p>Les commandes arrivent par mail, le bureau vérifie le stock et répond au client, puis le poste d'étiquetage reçoit la commande sur sa tablette. La TV de l'atelier montre en permanence ce qui reste à faire.</p>
       <div class="row" style="margin-top:16px">
@@ -530,6 +539,7 @@ function vPres() {
       <p class="muted" style="font-size:13px;margin-top:14px"><span class="tag">Données fictives</span>&nbsp; Clients, stocks et commandes sont inventés pour l'essai : rien n'est relié aux fichiers ni à la messagerie du domaine.</p>
     </div>
     <div class="card" style="padding:18px">
+      <div class="heroimg"><img src="img/logo.png" alt="Cherrier Frères" style="height:56px" onerror="this.remove()"><span class="sp"></span><img src="img/bouteille-blanc.png" alt="" onerror="this.remove()"><img src="img/bouteille-rouge.png" alt="" onerror="this.remove()"></div>
       <h3 style="font-size:18px;margin-bottom:8px">En ce moment dans la démo</h3>
       ${presStats()}
     </div>
@@ -620,9 +630,9 @@ function presStats() {
   return `<table class="t">${rows.map(r => `<tr><td>${r[0]}</td><td class="num"><b>${r[1]}</b></td></tr>`).join("")}</table>
   <p class="muted" style="font-size:12.5px;margin:10px 0 0">Dernière action : ${esc(lastLog())}</p>`;
 }
-const svgPC = () => `<svg width="120" height="90" viewBox="0 0 120 90"><rect x="10" y="6" width="100" height="62" rx="5" fill="#3b1219"/><rect x="15" y="11" width="90" height="52" rx="2" fill="#fffdf8"/><rect x="15" y="11" width="22" height="52" fill="#efe7da"/><rect x="42" y="17" width="56" height="5" rx="2" fill="#7a1f2b"/><rect x="42" y="27" width="40" height="4" rx="2" fill="#d9cdb9"/><rect x="42" y="35" width="50" height="4" rx="2" fill="#d9cdb9"/><rect x="42" y="43" width="34" height="4" rx="2" fill="#d9cdb9"/><path d="M44 68h32l4 12H40z" fill="#3b1219"/><rect x="34" y="80" width="52" height="4" rx="2" fill="#3b1219"/></svg>`;
-const svgTab = () => `<svg width="130" height="90" viewBox="0 0 130 90"><rect x="8" y="8" width="114" height="76" rx="9" fill="#3b1219"/><rect x="15" y="15" width="100" height="62" rx="3" fill="#fffdf8"/><rect x="20" y="21" width="90" height="16" rx="3" fill="#efe7da"/><rect x="20" y="41" width="28" height="12" rx="3" fill="#2e6b3f"/><rect x="51" y="41" width="28" height="12" rx="3" fill="#2e6b3f"/><rect x="82" y="41" width="28" height="12" rx="3" fill="#fff" stroke="#d9cdb9"/><rect x="60" y="60" width="50" height="12" rx="3" fill="#7a1f2b"/></svg>`;
-const svgTV = () => `<svg width="140" height="92" viewBox="0 0 140 92"><rect x="6" y="4" width="128" height="74" rx="4" fill="#17110f"/><rect x="12" y="16" width="36" height="56" rx="3" fill="#2e2420"/><rect x="52" y="16" width="36" height="56" rx="3" fill="#2e2420"/><rect x="92" y="16" width="36" height="56" rx="3" fill="#2e2420"/><rect x="15" y="20" width="30" height="10" rx="2" fill="#7a1f2b"/><rect x="15" y="33" width="30" height="10" rx="2" fill="#7a1f2b"/><rect x="55" y="20" width="30" height="10" rx="2" fill="#b4531f"/><rect x="95" y="20" width="30" height="10" rx="2" fill="#2e6b3f"/><rect x="95" y="33" width="30" height="10" rx="2" fill="#2e6b3f"/><rect x="12" y="7" width="40" height="5" rx="2" fill="#f3ebe0"/><path d="M60 78h20l3 8H57z" fill="#17110f"/></svg>`;
+const svgPC = () => `<svg width="120" height="90" viewBox="0 0 120 90"><rect x="10" y="6" width="100" height="62" rx="5" fill="#3b1219"/><rect x="15" y="11" width="90" height="52" rx="2" fill="#fffdf8"/><rect x="15" y="11" width="22" height="52" fill="var(--soft)"/><rect x="42" y="17" width="56" height="5" rx="2" fill="#7a1f2b"/><rect x="42" y="27" width="40" height="4" rx="2" fill="#d9cdb9"/><rect x="42" y="35" width="50" height="4" rx="2" fill="#d9cdb9"/><rect x="42" y="43" width="34" height="4" rx="2" fill="#d9cdb9"/><path d="M44 68h32l4 12H40z" fill="#3b1219"/><rect x="34" y="80" width="52" height="4" rx="2" fill="#3b1219"/></svg>`;
+const svgTab = () => `<svg width="130" height="90" viewBox="0 0 130 90"><rect x="8" y="8" width="114" height="76" rx="9" fill="#3b1219"/><rect x="15" y="15" width="100" height="62" rx="3" fill="#fffdf8"/><rect x="20" y="21" width="90" height="16" rx="3" fill="var(--soft)"/><rect x="20" y="41" width="28" height="12" rx="3" fill="#2e6b3f"/><rect x="51" y="41" width="28" height="12" rx="3" fill="#2e6b3f"/><rect x="82" y="41" width="28" height="12" rx="3" fill="#fff" stroke="#d9cdb9"/><rect x="60" y="60" width="50" height="12" rx="3" fill="#7a1f2b"/></svg>`;
+const svgTV = () => `<svg width="140" height="92" viewBox="0 0 140 92"><rect x="6" y="4" width="128" height="74" rx="4" fill="#17110f"/><rect x="12" y="16" width="36" height="56" rx="3" fill="#1F211D"/><rect x="52" y="16" width="36" height="56" rx="3" fill="#1F211D"/><rect x="92" y="16" width="36" height="56" rx="3" fill="#1F211D"/><rect x="15" y="20" width="30" height="10" rx="2" fill="#7a1f2b"/><rect x="15" y="33" width="30" height="10" rx="2" fill="#7a1f2b"/><rect x="55" y="20" width="30" height="10" rx="2" fill="#b4531f"/><rect x="95" y="20" width="30" height="10" rx="2" fill="#2e6b3f"/><rect x="95" y="33" width="30" height="10" rx="2" fill="#2e6b3f"/><rect x="12" y="7" width="40" height="5" rx="2" fill="#F5F2EC"/><path d="M60 78h20l3 8H57z" fill="#17110f"/></svg>`;
 
 /* ===== Ordinateur ===== */
 function vPC() {
@@ -789,7 +799,7 @@ function tabDetail(o) {
   ${o.lignes.map((l, i) => { const n = nbCartons(l); const ld = l.ce && l.et && l.ca;
     const stp = (f, lib) => `<button class="tstep ${l[f] ? "on" : ""}" data-act="tstep" data-id="${o.id}" data-i="${i}" data-f="${f}" ${ro ? "disabled" : ""}>${l[f] ? "✓" : "○"} ${lib}</button>`;
     return `<div class="tline ${ld ? "done" : ""}">
-      <div class="top"><span class="dot" style="width:18px;height:18px;margin-top:4px;background:${COUL[cuv(l.cuvee).coul]}"></span>
+      <div class="top">${btl(l.cuvee, "72px")}
         <div><div class="nm">${cuvLib(l.cuvee)}</div><div class="hb">Habillage : <b>${esc(hab(l.hab).nom)}</b></div></div>
         <div class="q"><b>${alloc(l)} bt</b>${n} cartons de ${l.carton}</div></div>
       <div class="tsteps">${stp("ce", "Contre-étiquettes")}${stp("et", "Bouteilles étiquetées")}${stp("ca", "Mises en cartons")}</div>
@@ -813,12 +823,12 @@ function vTV() {
     return `<div class="tvcard ${flashIds.has(o.id) ? "flash" : ""}" style="border-left-color:${ST[o.statut].c}">
       <div class="a"><b>N°${o.num}</b><span>${esc(c.nom)}</span>${urg ? `<span class="bdg">URGENT</span>` : o.pb ? `<span class="bdg">PROBLÈME</span>` : ""}</div>
       ${mode === "c" ? `<div class="d">${o.statut === "enlevement" ? `🚚 ${esc((o.enl?.tr || "").split(" — ")[0])} · ${fmtD(o.enl?.date)}` : "Enlèvement à réserver"} · ${o.colis || totCartons(o)} colis${o.palettes ? " · " + o.palettes + " pal." : ""}</div>`
-        : `<div class="d">Pour le ${fmtD(o.souhaitee)} · ${totBt(o)} bt · ${totCartons(o)} cartons</div>${o.lignes.slice(0, 3).map(l => `<div class="ln">• ${esc(cuv(l.cuvee).nom)} — ${esc(hab(l.hab).nom)} · ${alloc(l)}</div>`).join("")}${o.lignes.length > 3 ? `<div class="ln">+ ${o.lignes.length - 3} autre(s)</div>` : ""}`}
+        : `<div class="d">Pour le ${fmtD(o.souhaitee)} · ${totBt(o)} bt · ${totCartons(o)} cartons</div>${o.lignes.slice(0, 3).map(l => `<div class="ln tvl">${btl(l.cuvee, "3.2vw")}<span><b>${alloc(l)} ×</b> ${esc(cuv(l.cuvee).nom)}<br><small>${esc(hab(l.hab).nom)}</small></span></div>`).join("")}${o.lignes.length > 3 ? `<div class="ln">+ ${o.lignes.length - 3} autre(s)</div>` : ""}`}
       ${mode === "b" ? `<div class="tvbar"><i style="width:${progress(o) * 100}%"></i></div>` : ""}</div>`; };
   const col = (t, list, mode, color) => `<div class="tvcol"><h2><span class="dot" style="width:1vw;height:1vw;background:${color};border:0"></span>${t}<span class="k">${list.length}</span></h2>${list.map(o => card(o, mode)).join("") || `<div class="tvempty">Rien pour l'instant</div>`}</div>`;
   const now = new Date();
   return `<div class="tv">
-    <div class="tvhead"><div><h1>Domaine de la Rossignole</h1><div class="sub">Atelier · étiquetage et conditionnement</div></div>
+    <div class="tvhead"><img class="tvlogo" src="img/logo-sombre.png" alt="Cherrier Frères" onerror="this.style.display='none'"><div><h1>Préparation du jour</h1><div class="sub" style="padding-left:1.4vw">Atelier · étiquetage et conditionnement</div></div>
       <div class="tvclock"><b id="tvclock">${now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</b><span>${now.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}</span></div></div>
     <div class="tvcols">${col("À étiqueter", A, "a", ST.etiquetage.c)}${col("En cours", B, "b", ST.encours.c)}${col("Prêtes à partir", C, "c", ST.prete.c)}</div>
     <div class="tvfoot">${S.log.slice(-4).reverse().map(l => `<span><b>${fmtT(l.t)}</b> ${esc(l.txt)}</span>`).join("") || "<span>En attente d'activité…</span>"}</div>
@@ -851,7 +861,7 @@ function mailModal(title, to, subject, body, confirmLabel, onConfirm) {
   modalOk = onConfirm;
 }
 let modalOk = null;
-const SIGN = "\n\nBien cordialement,\nDomaine de la Rossignole\nSancerre · Menetou-Salon";
+const SIGN = "\n\nBien cordialement,\nCherrier Frères — Domaine de la Rossignole\nSancerre · Menetou-Salon";
 function lignesTxt(o, withDispo) {
   return o.lignes.map(l => { const a = alloc(l); const base = `- ${cuv(l.cuvee).nom} ${cuv(l.cuvee).mill} (${hab(l.hab).nom}) : `;
     if (!withDispo) return base + `${a} bouteilles, ${nbCartons(l)} cartons de ${l.carton}`;
@@ -905,7 +915,7 @@ document.addEventListener("click", e => {
     case "tpal": emit("order_patch", { id, patch: { palettes: Math.max(0, (o.palettes || 0) + (+v)) } }); break;
     case "tready": emit("order_patch", { id, patch: { colis: totCartons(o) } }); emit("statut", { id, statut: "prete", txt: "Commande prête au conditionnement" }); toast("Le bureau est prévenu"); break;
     case "treopen": emit("statut", { id, statut: "encours", txt: "Rouverte au poste d'étiquetage" }); break;
-    case "tpb": modal(`<h3>Signaler un problème — N°${o.num}</h3><label>Qu'est-ce qui ne va pas ?</label><textarea id="pbTxt" rows="3" placeholder="Ex. : manque d'étiquettes Clos des Remparts, carton abîmé…"></textarea>
+    case "tpb": modal(`<h3>Signaler un problème — N°${o.num}</h3><label>Qu'est-ce qui ne va pas ?</label><textarea id="pbTxt" rows="3" placeholder="Ex. : manque d'étiquettes Pierre Cherrier et Fils, carton abîmé…"></textarea>
       <div class="row" style="margin-top:8px">${["Manque d'étiquettes", "Manque de cartons", "Bouteilles manquantes", "Erreur d'habillage"].map(t => `<button class="btn s" data-act="pbq" data-txt="${t}">${t}</button>`).join("")}</div>
       <div class="actions"><span class="sp"></span><button class="btn" data-act="mclose">Annuler</button><button class="btn p" data-act="mok">Envoyer au bureau</button></div>`);
       modalOk = () => { const t = $("#pbTxt").value.trim(); if (t) { emit("pb", { id, txt: t }); toast("Problème envoyé au bureau"); } }; break;
@@ -934,7 +944,7 @@ document.addEventListener("change", e => {
 
 function enlModal(o) {
   const c = cli(o.client); const e0 = o.enl || {}; const colis = o.colis || totCartons(o);
-  const txt = () => `Bonjour,\n\nNous avons une expédition prête au Domaine de la Rossignole :\n\n- Commande : n°${o.num}\n- Destinataire : ${c.nom}, ${c.ville}\n- Colis : ${colis} cartons${o.palettes ? `, sur ${o.palettes} palette(s)` : ""}\n- Poids estimé : ${poids(o)} kg\n- Enlèvement souhaité : ${fmtD($("#eDate") ? $("#eDate").value : e0.date || plusJ(1))}\n\nMerci de nous confirmer le passage.` + SIGN;
+  const txt = () => `Bonjour,\n\nNous avons une expédition prête chez Cherrier Frères (Domaine de la Rossignole) :\n\n- Commande : n°${o.num}\n- Destinataire : ${c.nom}, ${c.ville}\n- Colis : ${colis} cartons${o.palettes ? `, sur ${o.palettes} palette(s)` : ""}\n- Poids estimé : ${poids(o)} kg\n- Enlèvement souhaité : ${fmtD($("#eDate") ? $("#eDate").value : e0.date || plusJ(1))}\n\nMerci de nous confirmer le passage.` + SIGN;
   modal(`<h3>Enlèvement — commande n°${o.num}</h3>
     <div class="grid2">
       <div><label>Transporteur</label><select id="eTr">${S.transp.map(t => `<option ${e0.tr === t ? "selected" : ""}>${esc(t)}</option>`).join("")}</select></div>
