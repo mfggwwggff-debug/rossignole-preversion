@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Domaine de la Rossignole — Gestion des commandes (préversion)</title>
+<meta name="theme-color" content="#3b1219">
+<style>
+:root{
+  --bg:#f6f2ea; --paper:#fffdf8; --ink:#231c18; --muted:#6f655c; --line:#e3dacb;
+  --wine:#7a1f2b; --wine-d:#3b1219; --gold:#b08a3e; --green:#2e6b3f; --orange:#b4531f; --red:#b3261e;
+  --blanc:#e2d48a; --rouge:#7a1f2b; --rose:#e8a3a0;
+  --r:10px; --shadow:0 1px 2px rgba(40,20,10,.06),0 4px 14px rgba(40,20,10,.06);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--wine)}
+h1,h2,h3{font-family:var(--serif);font-weight:600;margin:0}
+
+/* Barre du haut */
+#top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:14px;padding:10px 18px;background:var(--wine-d);color:#f4e9dc}
+#top .brand{display:flex;align-items:center;gap:10px;min-width:0}
+#top .brand b{font-family:var(--serif);font-size:18px;white-space:nowrap}
+#top .brand small{opacity:.7;font-size:12px;white-space:nowrap}
+.logo{width:30px;height:30px;flex:none}
+#views{display:flex;gap:4px;margin-left:auto;background:rgba(255,255,255,.08);padding:4px;border-radius:999px}
+#views button{border:0;background:transparent;color:#f4e9dc;padding:7px 14px;border-radius:999px;font-weight:500;white-space:nowrap}
+#views button.on{background:#f4e9dc;color:var(--wine-d)}
+#sync{display:flex;align-items:center;gap:6px;font-size:12px;opacity:.85;white-space:nowrap}
+#sync i{width:9px;height:9px;border-radius:50%;background:#999;display:inline-block}
+#sync.ok i{background:#5cc77a;box-shadow:0 0 0 3px rgba(92,199,122,.25)}
+#sync.wait i{background:#e2b33c}
+#sync.off i{background:#e0605a}
+@media (max-width:820px){#top{flex-wrap:wrap;padding:8px 12px}#top .brand small{display:none}#views{order:3;width:100%;margin:0;justify-content:space-between}#views button{flex:1;padding:7px 6px}}
+
+.badge{display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;color:#fff;white-space:nowrap}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border-radius:6px;font-size:12.5px;background:#efe7da;white-space:nowrap}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none;border:1px solid rgba(0,0,0,.15)}
+.btn{border:1px solid var(--line);background:var(--paper);padding:8px 14px;border-radius:8px;font-weight:500}
+.btn:hover{border-color:#cdbfa8}
+.btn.p{background:var(--wine);border-color:var(--wine);color:#fff}
+.btn.p:hover{background:#681924}
+.btn.g{background:var(--green);border-color:var(--green);color:#fff}
+.btn.s{padding:5px 10px;font-size:13px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.muted{color:var(--muted)}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+input[type=text],input[type=number],input[type=date],input[type=email],select,textarea{border:1px solid var(--line);background:#fff;border-radius:7px;padding:7px 9px;min-width:0}
+textarea{width:100%;resize:vertical}
+input[type=number]{width:90px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sp{flex:1}
+.ok{color:var(--green)} .warn{color:var(--orange)} .ko{color:var(--red)}
+.vchip{display:inline-block;padding:2px 8px;border-radius:6px;font-size:12.5px;font-weight:600}
+.vchip.ok{background:#e1f0e4;color:var(--green)} .vchip.tendu{background:#fbecd9;color:var(--orange)} .vchip.rupture{background:#f8dedc;color:var(--red)}
+
+/* ---------- Présentation ---------- */
+.pres{max-width:1100px;margin:0 auto;padding:28px 20px 60px}
+.hero{display:grid;grid-template-columns:1.3fr 1fr;gap:28px;align-items:center;margin-bottom:34px}
+.hero h1{font-size:38px;line-height:1.1;color:var(--wine-d)}
+.hero .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;color:var(--gold);font-weight:700;margin-bottom:10px}
+.hero p{font-size:17px;color:#4a3f37}
+.tag{display:inline-block;background:#f1e3c4;color:#6b4e12;border-radius:6px;padding:3px 9px;font-size:13px;font-weight:600}
+.flow{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin:14px 0 6px}
+.flow div{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 10px;position:relative;font-size:13.5px}
+.flow div b{display:flex;width:26px;height:26px;border-radius:50%;background:var(--wine);color:#fff;align-items:center;justify-content:center;font-size:13px;margin-bottom:8px}
+.flow div em{display:block;font-style:normal;color:var(--muted);font-size:12px;margin-top:4px}
+.flow div.fa b{background:var(--gold)} .flow div.fb b{background:var(--wine-d)}
+@media (max-width:900px){.hero{grid-template-columns:1fr}.flow{grid-template-columns:1fr 1fr}}
+.sect{margin-top:38px}
+.sect>h2{font-size:24px;margin-bottom:6px;color:var(--wine-d)}
+.supports{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:14px}
+@media (max-width:820px){.supports{grid-template-columns:1fr}}
+.sup{padding:18px;display:flex;flex-direction:column;gap:10px}
+.sup h3{font-size:20px}
+.sup .ill{height:118px;border-radius:8px;background:#efe7da;display:flex;align-items:center;justify-content:center}
+.sup ul{margin:0;padding-left:18px;color:#4a3f37;font-size:14px}
+.how{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-top:14px}
+@media (max-width:820px){.how{grid-template-columns:1fr}}
+.how ol{margin:0;padding-left:20px}
+.how ol li{margin:6px 0}
+.share{padding:18px;display:flex;gap:16px;align-items:center}
+.share img{width:150px;height:150px;border-radius:6px;background:#fff;flex:none}
+.linkbox{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:#f3ede3;border-radius:6px;padding:7px 9px;word-break:break-all;margin:8px 0}
+.notin{columns:2;font-size:14px;color:#4a3f37}
+@media (max-width:700px){.notin{columns:1}}
+
+/* ---------- Ordinateur ---------- */
+.pc{display:grid;grid-template-columns:210px minmax(0,1fr);min-height:calc(100vh - 54px)}
+.side{background:#efe7da;border-right:1px solid var(--line);padding:14px 10px;display:flex;flex-direction:column;gap:3px}
+.side button{display:flex;align-items:center;gap:10px;border:0;background:transparent;padding:10px 12px;border-radius:8px;text-align:left;font-weight:500}
+.side button:hover{background:#e6dccb}
+.side button.on{background:var(--paper);box-shadow:var(--shadow);color:var(--wine)}
+.side .n{margin-left:auto;background:var(--wine);color:#fff;border-radius:999px;font-size:11.5px;padding:1px 7px}
+.side .foot{margin-top:auto;font-size:12px;color:var(--muted);padding:8px 10px}
+.pcmain{padding:18px 22px;min-width:0}
+.pchead{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.pchead h2{font-size:24px}
+@media (max-width:820px){.pc{grid-template-columns:1fr}.side{flex-direction:row;overflow:auto;padding:8px}.side .foot{display:none}.side button{white-space:nowrap}}
+.split{display:grid;grid-template-columns:minmax(280px,400px) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:1100px){.split{grid-template-columns:1fr}}
+.list{overflow:hidden}
+.li{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:transparent;padding:11px 14px}
+.li:last-child{border-bottom:0}
+.li:hover{background:#faf5ec}
+.li.on{background:#f5ead9;box-shadow:inset 3px 0 0 var(--wine)}
+.li .l1{display:flex;gap:8px;align-items:center}
+.li .l1 b{font-weight:600}
+.li .l2{font-size:13px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.unread b{color:var(--wine)}
+.unread .l1::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--wine);flex:none}
+.pane{padding:18px 20px;min-width:0}
+.pane select{max-width:100%;width:100%}
+.mailbody{white-space:pre-wrap;background:#fbf8f2;border:1px solid var(--line);border-radius:8px;padding:14px;font-size:14.5px;margin:12px 0}
+table.t{width:100%;border-collapse:collapse;font-size:14px}
+table.t th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600;padding:8px 8px;border-bottom:1px solid var(--line)}
+table.t td{padding:8px;border-bottom:1px solid #efe8dc;vertical-align:middle}
+table.t tr:last-child td{border-bottom:0}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.filters button{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 12px;font-size:13px}
+.filters button.on{background:var(--wine-d);color:#fff;border-color:var(--wine-d)}
+.stepper{display:flex;gap:0;margin:14px 0 4px;overflow-x:auto}
+.stepper div{flex:1;min-width:92px;font-size:11.5px;color:var(--muted);position:relative;padding-top:16px;text-align:center}
+.stepper div::before{content:"";position:absolute;top:5px;left:0;right:0;height:3px;background:var(--line)}
+.stepper div::after{content:"";position:absolute;top:0;left:50%;margin-left:-6px;width:12px;height:12px;border-radius:50%;background:var(--line)}
+.stepper div.done::before,.stepper div.done::after{background:var(--green)}
+.stepper div.cur{color:var(--ink);font-weight:600}
+.stepper div.cur::after{background:var(--wine);box-shadow:0 0 0 4px rgba(122,31,43,.18)}
+.box{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:#fbf8f2;margin-top:12px}
+.box.alert{background:#fdf0ee;border-color:#efc4be}
+.box.warn{background:#fdf5e8;border-color:#efd5ae}
+.box h4{margin:0 0 6px;font-size:14px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.hist{font-size:13px;color:var(--muted);margin:0;padding-left:16px}
+.bar{height:8px;background:#ece4d6;border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--green)}
+.empty{padding:40px;text-align:center;color:var(--muted)}
+
+/* ---------- Tablette ---------- */
+.tab{display:grid;grid-template-columns:340px 1fr;gap:0;min-height:calc(100vh - 54px);background:#ece5d8}
+.tlist{padding:14px;display:flex;flex-direction:column;gap:10px;border-right:1px solid var(--line);overflow:auto}
+.tlist h3{font-family:var(--sans);font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:8px 4px 0}
+.tcard{border:2px solid transparent;background:var(--paper);border-radius:12px;padding:14px;text-align:left;box-shadow:var(--shadow);min-height:64px}
+.tcard.on{border-color:var(--wine)}
+.tcard .n{font-family:var(--serif);font-size:22px;font-weight:700}
+.tcard .c{font-size:16px;font-weight:600}
+.tcard .m{font-size:13.5px;color:var(--muted);margin-top:4px}
+.tdet{padding:18px 22px;overflow:auto}
+.tdet h2{font-size:30px}
+.tline{background:var(--paper);border-radius:14px;padding:16px;margin-top:12px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.tline.done{border-color:#9fcfab;background:#f3faf4}
+.tline .top{display:flex;gap:12px;align-items:flex-start}
+.tline .nm{font-size:19px;font-weight:700}
+.tline .hb{font-size:16px;margin-top:3px}
+.tline .q{margin-left:auto;text-align:right;font-size:15px;color:var(--muted)}
+.tline .q b{display:block;font-size:26px;color:var(--ink);font-variant-numeric:tabular-nums}
+.tsteps{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;align-items:center}
+.tstep{flex:1;min-width:150px;min-height:56px;border:2px solid var(--line);border-radius:12px;background:#fff;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px}
+.tstep.on{background:var(--green);border-color:var(--green);color:#fff}
+.cnt{display:flex;align-items:center;gap:8px;font-size:16px}
+.cnt button{width:52px;height:52px;border-radius:12px;border:2px solid var(--line);background:#fff;font-size:24px;font-weight:700}
+.cnt b{min-width:72px;text-align:center;font-size:20px;font-variant-numeric:tabular-nums}
+.consigne{background:#fff5c9;border:1px solid #ecd77a;border-radius:12px;padding:12px 14px;font-size:16px;margin-top:12px}
+.tfoot{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap}
+.tfoot .btn{min-height:58px;font-size:17px;padding:10px 22px;border-radius:12px}
+@media (max-width:860px){.tab{grid-template-columns:1fr}.tlist{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line)}.tlist h3{display:none}.tcard{min-width:220px}}
+
+/* ---------- TV ---------- */
+.tv{background:#17110f;color:#f3ebe0;min-height:100vh;padding:2.2vh 2.2vw;display:flex;flex-direction:column;gap:2vh;font-size:1.25vw}
+.tvhead{display:flex;align-items:center;gap:2vw}
+.tvhead h1{font-size:2.4vw;color:#f3ebe0}
+.tvhead .sub{color:#bba98f;font-size:1.2vw}
+.tvclock{margin-left:auto;text-align:right}
+.tvclock b{font-size:3.4vw;font-variant-numeric:tabular-nums;font-weight:600;display:block;line-height:1}
+.tvclock span{color:#bba98f;font-size:1.2vw}
+.tvcols{display:grid;grid-template-columns:repeat(3,1fr);gap:1.6vw;flex:1;min-height:0}
+.tvcol{background:#221a17;border-radius:1vw;padding:1.2vw;display:flex;flex-direction:column;gap:1vw;min-height:0;overflow:hidden}
+.tvcol h2{font-family:var(--sans);font-size:1.5vw;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:.8vw}
+.tvcol h2 .k{margin-left:auto;background:#3a2c27;border-radius:999px;padding:.1vw 1vw;font-size:1.4vw}
+.tvcard{background:#2e2420;border-radius:.8vw;padding:1vw 1.2vw;border-left:.5vw solid #7a1f2b}
+.tvcard .a{display:flex;align-items:baseline;gap:1vw}
+.tvcard .a b{font-size:2vw;font-family:var(--serif)}
+.tvcard .a span{min-width:0;flex:1;font-size:1.6vw;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tvcard .bdg{flex:none;margin-left:auto;font-size:1vw;background:#b3261e;border-radius:999px;padding:.15vw .8vw;font-weight:700;white-space:nowrap}
+.tvcard .d{color:#cbbba3;margin-top:.4vw;font-size:1.15vw}
+.tvcard .ln{font-size:1.15vw;margin-top:.3vw;color:#e9ddcc}
+.tvbar{height:.6vw;background:#3a2c27;border-radius:999px;overflow:hidden;margin-top:.6vw}
+.tvbar i{display:block;height:100%;background:#6fcf8a}
+.tvfoot{display:flex;gap:2vw;color:#bba98f;font-size:1.1vw;white-space:nowrap;overflow:hidden;border-top:1px solid #3a2c27;padding-top:1vh}
+.tvfoot b{color:#f3ebe0;font-weight:600}
+.tvempty{color:#7d6d5d;font-size:1.3vw;padding:1vw}
+.flash{animation:flash 2.4s ease-out}
+@keyframes flash{0%{box-shadow:0 0 0 .4vw #e2b33c;transform:scale(1.02)}100%{box-shadow:0 0 0 0 transparent;transform:none}}
+body.tvmode #top{position:fixed;left:0;right:0;transform:translateY(-100%);transition:transform .3s}
+body.tvmode.showtop #top{transform:none}
+
+/* Modale / toast */
+#modal{position:fixed;inset:0;background:rgba(30,15,10,.45);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+#modal.on{display:flex}
+#modal .mbox{background:var(--paper);border-radius:14px;max-width:640px;width:100%;max-height:90vh;overflow:auto;padding:20px 22px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+#modal h3{font-size:21px;margin-bottom:10px}
+#modal label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+#modal .grid2{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}
+#modal .grid2 input,#modal .grid2 select{width:100%}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(30px);background:var(--wine-d);color:#fff;padding:10px 18px;border-radius:999px;opacity:0;transition:.25s;z-index:60;font-size:14px;pointer-events:none}
+#toast.on{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<header id="top">
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="#f4e9dc"/><path d="M16 6c-2 4-6 6-6 11a6 6 0 0 0 12 0c0-5-4-7-6-11z" fill="#7a1f2b"/><path d="M16 23v4M12 27h8" stroke="#7a1f2b" stroke-width="1.6" stroke-linecap="round"/></svg>
+    <div><b>Domaine de la Rossignole</b><br><small>Gestion des commandes · préversion d'essai</small></div>
+  </div>
+  <nav id="views">
+    <button data-view="pres">Présentation</button>
+    <button data-view="pc">Ordinateur</button>
+    <button data-view="tab">Tablette</button>
+    <button data-view="tv">TV</button>
+  </nav>
+  <div id="sync" class="wait" title="Synchronisation entre appareils"><i></i><span>Connexion…</span></div>
+</header>
+<main id="app"></main>
+<div id="modal"><div class="mbox" id="mbox"></div></div>
+<div id="toast"></div>
+
+<script>
+"use strict";
+/* =====================================================================
+   Préversion d'essai — toutes les données sont fictives.
+   Synchronisation entre appareils : chaque action est un petit "événement"
+   publié sur un canal ntfy.sh ; chaque appareil rejoue les événements.
+   ===================================================================== */
+
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const uid = () => (Date.now().toString(36) + Math.random().toString(36).slice(2, 10));
+function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+
+const DEV = lsGet("rossi-dev") || (() => { const d = uid().slice(-6); lsSet("rossi-dev", d); return d; })();
+const params = new URLSearchParams(location.search);
+const SALLE = ((params.get("salle") || "principale").toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 24)) || "principale";
+const TOPIC = "rossignole-pv-k7q2-" + SALLE;
+const NTFY = "https://ntfy.sh/" + TOPIC;
+const LSKEY = "rossi-ev-" + SALLE;
+const LSOUT = "rossi-out-" + SALLE;
+
+/* ---------- dates ---------- */
+const isoD = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+const plusJ = n => { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + n); return isoD(d); };
+const TODAY = () => isoD(new Date());
+const fmtD = s => { if (!s) return "—"; const [y, m, d] = s.split("-"); return new Date(+y, m - 1, +d).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" }); };
+const fmtT = t => new Date(t).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+const fmtDT = t => { const d = new Date(t); return (isoD(d) === TODAY() ? "Aujourd'hui" : d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })) + " " + fmtT(t); };
+const ago = m => Date.now() - m * 60000;
+
+/* ---------- données de départ (fictives) ---------- */
+const COUL = { blanc: "var(--blanc)", rouge: "var(--rouge)", rose: "var(--rose)" };
+function SEED() {
+  return {
+    nextNum: 1046,
+    cuvees: [
+      { id: "c1", nom: "Sancerre blanc « Tradition »", mill: 2024, coul: "blanc", stock: 1800, res: 360, kg: 1.3 },
+      { id: "c2", nom: "Sancerre blanc « Vieilles Vignes »", mill: 2023, coul: "blanc", stock: 300, res: 96, kg: 1.3 },
+      { id: "c3", nom: "Sancerre blanc « Prestige »", mill: 2022, coul: "blanc", stock: 240, res: 48, kg: 1.35 },
+      { id: "c4", nom: "Sancerre rouge", mill: 2023, coul: "rouge", stock: 720, res: 120, kg: 1.3 },
+      { id: "c5", nom: "Sancerre rosé", mill: 2024, coul: "rose", stock: 600, res: 120, kg: 1.3 },
+      { id: "c6", nom: "Menetou-Salon blanc", mill: 2024, coul: "blanc", stock: 1200, res: 240, kg: 1.3 },
+      { id: "c7", nom: "Menetou-Salon rouge", mill: 2023, coul: "rouge", stock: 480, res: 96, kg: 1.3 },
+      { id: "c8", nom: "Menetou-Salon rosé", mill: 2024, coul: "rose", stock: 360, res: 72, kg: 1.3 },
+      { id: "c9", nom: "Sancerre blanc « Tradition » Magnum", mill: 2023, coul: "blanc", stock: 90, res: 18, kg: 2.6 }
+    ],
+    habs: [
+      { id: "h1", nom: "Domaine — étiquette standard" },
+      { id: "h2", nom: "Domaine — export (mentions EN)" },
+      { id: "h3", nom: "Marque « Clos des Remparts »" },
+      { id: "h4", nom: "Marque distributeur « Caves Ligériennes »" },
+      { id: "h5", nom: "Le Bouchon — étiquette personnalisée" },
+      { id: "h6", nom: "Coffret cadeau" }
+    ],
+    clients: [
+      { id: "k1", nom: "Cave des Remparts", ville: "Tours", email: "commandes@cave-remparts.example", hab: true, pro: true },
+      { id: "k2", nom: "Les Caves Ligériennes", ville: "Orléans", email: "achats@caves-ligeriennes.example", hab: true, pro: true },
+      { id: "k3", nom: "Restaurant Le Bouchon", ville: "Bourges", email: "contact@lebouchon.example", hab: true, pro: true },
+      { id: "k4", nom: "Vins & Co", ville: "Paris 11e", email: "cave@vinsetco.example", hab: false, pro: true },
+      { id: "k5", nom: "Brussels Wine Import", ville: "Bruxelles (BE)", email: "orders@bwi.example", hab: true, pro: true },
+      { id: "k6", nom: "Mme Martin", ville: "Nevers", email: "c.martin@orange.example", hab: false, pro: false },
+      { id: "k7", nom: "Hôtel du Lac", ville: "Annecy", email: "sommelier@hoteldulac.example", hab: false, pro: true }
+    ],
+    transp: ["Transporteur A — messagerie colis", "Transporteur B — palettes", "Transporteur C — export Benelux", "Enlèvement par le client"],
+    mails: [
+      { id: "m1", client: "k7", sujet: "Commande pour fin de mois", recu: ago(48), lu: false, traite: false, souhaitee: plusJ(7),
+        corps: "Bonjour,\n\nPour notre carte d'hiver, pourriez-vous nous préparer :\n- 120 bouteilles de Sancerre blanc Tradition 2024\n- 60 bouteilles de Sancerre rouge 2023\n\nEn cartons de 6 s'il vous plaît, pour une livraison avant le " + fmtD(plusJ(7)) + ".\n\nBien cordialement,\nLe sommelier — Hôtel du Lac",
+        lignes: [{ cuvee: "c1", hab: "h1", qte: 120, carton: 6 }, { cuvee: "c4", hab: "h1", qte: 60, carton: 6 }] },
+      { id: "m2", client: "k4", sujet: "Réassort Vieilles Vignes", recu: ago(95), lu: false, traite: false, souhaitee: plusJ(4),
+        corps: "Bonjour,\n\nLes Vieilles Vignes partent très bien, je voudrais 360 bouteilles (cartons de 12) et 60 bouteilles de Prestige en cartons de 6.\n\nMerci de me dire ce qui est possible.\n\nThomas — Vins & Co",
+        lignes: [{ cuvee: "c2", hab: "h1", qte: 360, carton: 12 }, { cuvee: "c3", hab: "h1", qte: 60, carton: 6 }] },
+      { id: "m3", client: "k6", sujet: "Vin pour une fête de famille", recu: ago(240), lu: true, traite: false, souhaitee: plusJ(10),
+        corps: "Bonjour,\n\nNous fêtons les 60 ans de mon mari. Je souhaiterais 12 bouteilles de Menetou-Salon rouge et 6 bouteilles de rosé.\nJe peux passer les chercher au domaine.\n\nMerci beaucoup,\nCatherine Martin",
+        lignes: [{ cuvee: "c7", hab: "h1", qte: 12, carton: 6 }, { cuvee: "c8", hab: "h1", qte: 6, carton: 6 }] }
+    ],
+    orders: [
+      mkOrder("o1", 1041, "k1", "etiquetage", plusJ(1), ago(60 * 26), [L("c1", "h3", 120, 6), L("c4", "h1", 60, 6)], "Mettre 2 cartons de dégustation à part (étiquette standard)."),
+      mkOrder("o2", 1042, "k5", "encours", TODAY(), ago(60 * 30), [L("c1", "h2", 240, 12, true, true, false, 12), L("c6", "h2", 120, 12, true, true, true, 10)], "Export Belgique : vérifier la mention EN sur la contre-étiquette.", { palettes: 1 }),
+      mkOrder("o3", 1043, "k3", "prete", plusJ(2), ago(60 * 50), [L("c5", "h5", 36, 6, true, true, true, 6), L("c2", "h5", 24, 6, true, true, true, 4)], "", { colis: 10 }),
+      mkOrder("o4", 1044, "k2", "enlevement", plusJ(1), ago(60 * 70), [L("c6", "h4", 600, 12, true, true, true, 50)], "", { palettes: 1, colis: 50, enl: { tr: "Transporteur B — palettes", date: plusJ(1), ref: "B-48213" } }),
+      mkOrder("o5", 1045, "k4", "attente", plusJ(6), ago(60 * 20), [L("c3", "h1", 60, 6)], "")
+    ],
+    log: []
+  };
+}
+function L(cuvee, hab, qte, carton, ce = false, et = false, ca = false, faits = 0) { return { cuvee, hab, qte, carton, alloc: qte, ce, et, ca, faits }; }
+function mkOrder(id, num, client, statut, souhaitee, recu, lignes, notes, x = {}) {
+  return Object.assign({ id, num, client, statut, souhaitee, recu, lignes, notes, palettes: 0, colis: 0, enl: null, pb: null, hist: [{ t: recu, txt: "Commande créée" }] }, x);
+}
+function normLine(l) { return { cuvee: l.cuvee, hab: l.hab || "h1", qte: +l.qte || 0, carton: +l.carton || 6, alloc: l.alloc != null ? +l.alloc : (+l.qte || 0), ce: false, et: false, ca: false, faits: 0 }; }
+
+const ST = {
+  nouvelle:   { lib: "Nouvelle — à vérifier", court: "Nouvelle", c: "#2f5d8a" },
+  attente:    { lib: "Réponse envoyée — attente du client", court: "Attente client", c: "#8a6d1f" },
+  etiquetage: { lib: "À étiqueter", court: "À étiqueter", c: "#7a1f2b" },
+  encours:    { lib: "En cours au conditionnement", court: "En cours", c: "#b4531f" },
+  prete:      { lib: "Prête — enlèvement à réserver", court: "Prête", c: "#2e6b3f" },
+  enlevement: { lib: "Enlèvement réservé", court: "Enlèvement réservé", c: "#1f6b6b" },
+  expediee:   { lib: "Expédiée — client notifié", court: "Expédiée", c: "#6f655c" },
+  annulee:    { lib: "Annulée", court: "Annulée", c: "#9a8f85" }
+};
+const FLOW = ["nouvelle", "attente", "etiquetage", "encours", "prete", "enlevement", "expediee"];
+const RESERVE_ST = ["attente", "etiquetage", "encours", "prete", "enlevement"];
+const ACTIVE_ST = ["nouvelle", "attente", "etiquetage", "encours", "prete", "enlevement"];
+
+/* ---------- moteur d'événements ---------- */
+let events = []; try { events = JSON.parse(lsGet(LSKEY) || "[]"); } catch (e) { events = []; }
+let outbox = []; try { outbox = JSON.parse(lsGet(LSOUT) || "[]"); } catch (e) { outbox = []; }
+const seen = new Set(events.map(e => e.id));
+let S = SEED();
+
+function rebuild() {
+  events.sort((a, b) => a.t - b.t || (a.id < b.id ? -1 : 1));
+  S = SEED();
+  for (const e of events) { try { apply(S, e); } catch (err) { console.warn("évènement ignoré", e, err); } }
+}
+function persist() {
+  let last = -1; events.forEach((e, i) => { if (e.type === "reset") last = i; });
+  if (last > 0) { events = events.slice(last); }
+  lsSet(LSKEY, JSON.stringify(events.slice(-1500)));
+}
+function ord(id) { return S.orders.find(o => o.id === id); }
+function cuv(id) { return S.cuvees.find(c => c.id === id) || { nom: "?", coul: "blanc", stock: 0, res: 0, kg: 1.3 }; }
+function hab(id) { return S.habs.find(h => h.id === id) || { nom: "?" }; }
+function cli(id) { return S.clients.find(c => c.id === id) || { nom: "?", ville: "", email: "" }; }
+const alloc = l => (l.alloc != null ? l.alloc : l.qte);
+const nbCartons = l => Math.ceil(alloc(l) / (l.carton || 6));
+
+function apply(S, e) {
+  const p = e.p || {}; const o = p.id ? S.orders.find(x => x.id === p.id) : null;
+  const hist = (o, txt) => { if (o) { o.hist.push({ t: e.t, txt }); S.log.push({ t: e.t, txt: "N°" + o.num + " · " + txt }); } };
+  switch (e.type) {
+    case "reset": { const f = SEED(); for (const k of Object.keys(S)) delete S[k]; Object.assign(S, f); S.log.push({ t: e.t, txt: "Démo réinitialisée" }); break; }
+    case "mail_new": S.mails.unshift(Object.assign({}, p.mail, { recu: e.t, lu: false, traite: false })); S.log.push({ t: e.t, txt: "Nouveau mail de " + cli(p.mail.client).nom }); break;
+    case "mail_lu": { const m = S.mails.find(x => x.id === p.id); if (m) m.lu = true; break; }
+    case "order_create": {
+      const src = p.order;
+      const o2 = mkOrder(src.id, S.nextNum++, src.client, "nouvelle", src.souhaitee || plusJ(5), e.t, (src.lignes || []).map(normLine), src.notes || "");
+      o2.hist = []; S.orders.push(o2);
+      hist(o2, src.mail ? "Commande créée depuis un mail" : "Commande saisie au bureau");
+      if (src.mail) { const m = S.mails.find(x => x.id === src.mail); if (m) { m.traite = true; m.lu = true; m.order = o2.id; } }
+      break;
+    }
+    case "order_patch": if (o) Object.assign(o, p.patch); if (o && p.txt) hist(o, p.txt); break;
+    case "line_patch": if (o && o.lignes[p.i]) Object.assign(o.lignes[p.i], p.patch); break;
+    case "line_add": if (o) o.lignes.push(normLine(p.line)); break;
+    case "line_del": if (o) o.lignes.splice(p.i, 1); break;
+    case "statut": if (o) {
+      const from = o.statut; o.statut = p.statut;
+      if (p.statut === "expediee" && from !== "expediee") o.lignes.forEach(l => { const c = S.cuvees.find(c => c.id === l.cuvee); if (c) c.stock = Math.max(0, c.stock - alloc(l)); });
+      if (p.statut === "etiquetage" && from === "encours") { /* retour */ }
+      hist(o, p.txt || ST[p.statut].lib);
+    } break;
+    case "stock": { const c = S.cuvees.find(x => x.id === p.id); if (c) Object.assign(c, p.patch); S.log.push({ t: e.t, txt: "Stock mis à jour : " + (c ? c.nom : "") }); break; }
+    case "pb": if (o) { o.pb = p.txt ? { txt: p.txt, t: e.t } : null; hist(o, p.txt ? "Problème signalé au poste : " + p.txt : "Problème résolu"); } break;
+    case "mailout": if (o) hist(o, "Mail préparé : " + p.kind); break;
+  }
+}
+
+/* ---------- synchronisation ---------- */
+function addEvents(list, fromRemote) {
+  let added = false;
+  for (const e of list) { if (!e || !e.id || !e.type || seen.has(e.id)) continue; seen.add(e.id); events.push(e); added = true; }
+  if (added) {
+    const before = snapshotKeys();
+    rebuild(); persist();
+    if (fromRemote) markChanges(before);
+    render(!fromRemote);
+  }
+  return added;
+}
+function emit(type, p) {
+  const e = { id: uid(), t: Date.now(), d: DEV, type, p };
+  addEvents([e], false);
+  outbox.push(e); lsSet(LSOUT, JSON.stringify(outbox)); flush();
+  return e;
+}
+let flushing = false;
+async function flush() {
+  if (flushing || !outbox.length) return; flushing = true;
+  try {
+    while (outbox.length) {
+      const e = outbox[0];
+      const r = await fetch(NTFY, { method: "POST", body: JSON.stringify(e) });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      outbox.shift(); lsSet(LSOUT, JSON.stringify(outbox));
+    }
+    setSync("ok");
+  } catch (err) { setSync("off"); setTimeout(() => { flushing = false; flush(); }, 15000); return; }
+  flushing = false;
+}
+let es = null;
+function connect() {
+  if (!("EventSource" in window)) { setSync("off"); return; }
+  try {
+    es = new EventSource(NTFY + "/sse?since=all");
+    es.onopen = () => setSync("ok");
+    es.onmessage = ev => { try { const m = JSON.parse(ev.data); if (m.event === "message") addEvents([JSON.parse(m.message)], true); } catch (e) {} };
+    es.onerror = () => setSync(navigator.onLine ? "wait" : "off");
+  } catch (e) { setSync("off"); }
+  // Si le canal a été vidé (le service garde ~12 h), on republie ce que cet appareil connaît.
+  fetch(NTFY + "/json?poll=1&since=all").then(r => r.ok ? r.text() : Promise.reject()).then(txt => {
+    const ids = new Set();
+    txt.split("\n").forEach(l => { try { const m = JSON.parse(l); if (m.event === "message") ids.add(JSON.parse(m.message).id); } catch (e) {} });
+    const missing = events.filter(e => !ids.has(e.id) && !outbox.some(x => x.id === e.id) && e.t < Date.now() - 60000).slice(-60);
+    if (missing.length && ids.size < events.length) { outbox = missing.concat(outbox); lsSet(LSOUT, JSON.stringify(outbox)); flush(); }
+  }).catch(() => {});
+}
+function setSync(s) {
+  const el = $("#sync"); if (!el) return;
+  el.className = s;
+  el.querySelector("span").textContent = s === "ok" ? "Synchro en direct" : s === "wait" ? "Reconnexion…" : "Hors ligne (local)";
+  el.title = s === "ok" ? "Les actions apparaissent en direct sur les autres appareils (salle « " + SALLE + " »)" : "Les actions restent sur cet appareil et partiront dès que la connexion revient";
+}
+window.addEventListener("online", flush);
+
+/* repérer ce qui change pour le faire clignoter (TV / tablette) */
+let flashIds = new Set();
+function snapshotKeys() { const m = {}; S.orders.forEach(o => m[o.id] = o.statut + "|" + o.lignes.map(l => +l.ce + +l.et + +l.ca + "/" + l.faits).join(",") + "|" + (o.pb ? 1 : 0)); return m; }
+function markChanges(before) {
+  const after = snapshotKeys(); flashIds = new Set();
+  for (const k in after) if (before[k] !== after[k]) flashIds.add(k);
+  if (flashIds.size) { toast(lastLog()); setTimeout(() => { flashIds = new Set(); }, 2600); }
+}
+function lastLog() { const l = S.log[S.log.length - 1]; return l ? l.txt : "Mise à jour reçue"; }
+
+/* ---------- calculs de stock ---------- */
+function reserved(cid, exceptId) {
+  let s = 0; for (const o of S.orders) { if (o.id === exceptId || !RESERVE_ST.includes(o.statut)) continue; for (const l of o.lignes) if (l.cuvee === cid) s += alloc(l); } return s;
+}
+function pendingNew(cid, exceptId) {
+  let s = 0; for (const o of S.orders) { if (o.id === exceptId || o.statut !== "nouvelle") continue; for (const l of o.lignes) if (l.cuvee === cid) s += l.qte; } return s;
+}
+function verdict(o) {
+  const c = cli(o.client); const out = {};
+  const dem = {}; o.lignes.forEach(l => dem[l.cuvee] = (dem[l.cuvee] || 0) + l.qte);
+  for (const cid in dem) {
+    const cv = cuv(cid); const r = reserved(cid, o.id); const dispo = cv.stock - r; const libre = dispo - (c.hab ? 0 : cv.res);
+    const level = dem[cid] <= libre ? "ok" : dem[cid] <= dispo ? "tendu" : "rupture";
+    out[cid] = { demande: dem[cid], stock: cv.stock, reserve: r, dispo, libre, resHab: cv.res, attente: pendingNew(cid, o.id), level, max: Math.max(0, c.hab ? dispo : libre) };
+  }
+  return out;
+}
+function worst(v) { let w = "ok"; for (const k in v) { if (v[k].level === "rupture") return "rupture"; if (v[k].level === "tendu") w = "tendu"; } return w; }
+const VLIB = { ok: "Disponible", tendu: "Tendu", rupture: "Insuffisant" };
+function progress(o) { let tot = 0, done = 0; o.lignes.forEach(l => { tot += 3; done += (+l.ce) + (+l.et) + (+l.ca); }); return tot ? done / tot : 0; }
+function totBt(o) { return o.lignes.reduce((s, l) => s + alloc(l), 0); }
+function totCartons(o) { return o.lignes.reduce((s, l) => s + nbCartons(l), 0); }
+function poids(o) { return Math.round(o.lignes.reduce((s, l) => s + alloc(l) * cuv(l.cuvee).kg + nbCartons(l) * 0.4, 0) + (o.palettes || 0) * 25); }
+
+/* ---------- état d'interface (propre à chaque appareil) ---------- */
+const ui = {
+  view: (location.hash.replace("#", "") || lsGet("rossi-view") || "pres"),
+  pcTab: "cmd", mail: null, order: null, filtre: "actives", tabOrder: null,
+  add: { cuvee: "c1", hab: "h1", qte: 12, carton: 6 }
+};
+if (!["pres", "pc", "tab", "tv"].includes(ui.view)) ui.view = "pres";
+
+function setView(v) { ui.view = v; lsSet("rossi-view", v); history.replaceState(null, "", location.pathname + location.search + "#" + v); render(true); window.scrollTo(0, 0); }
+window.addEventListener("hashchange", () => { const v = location.hash.replace("#", ""); if (["pres", "pc", "tab", "tv"].includes(v) && v !== ui.view) setView(v); });
+
+/* ---------- rendu ---------- */
+let pendingRender = false;
+function render(force) {
+  const a = document.activeElement;
+  const editing = a && $("#app").contains(a) && (a.tagName === "TEXTAREA" || (a.tagName === "INPUT" && a.type !== "button" && a.type !== "checkbox") || a.tagName === "SELECT");
+  if (editing && !force) { pendingRender = true; return; }
+  const key = editing ? a.dataset.k : null;
+  pendingRender = false;
+  document.querySelectorAll("#views button").forEach(b => b.classList.toggle("on", b.dataset.view === ui.view));
+  document.body.classList.toggle("tvmode", ui.view === "tv");
+  const v = ui.view;
+  $("#app").innerHTML = v === "pres" ? vPres() : v === "pc" ? vPC() : v === "tab" ? vTab() : vTV();
+  if (key) { const el = document.querySelector('[data-k="' + key + '"]'); if (el) el.focus(); }
+}
+document.addEventListener("focusout", () => setTimeout(() => { if (pendingRender) render(); }, 30));
+
+const badge = s => `<span class="badge" style="background:${ST[s].c}">${ST[s].court}</span>`;
+const dot = cid => `<span class="dot" style="background:${COUL[cuv(cid).coul]}"></span>`;
+const cuvLib = cid => { const c = cuv(cid); return esc(c.nom) + " " + c.mill; };
+
+/* ===== Présentation ===== */
+function baseLink(view) { return location.origin + location.pathname + (SALLE !== "principale" ? "?salle=" + SALLE : "") + "#" + view; }
+function vPres() {
+  const tabLink = baseLink("tab");
+  return `<div class="pres">
+  <section class="hero">
+    <div>
+      <div class="kicker">Préversion d'essai · ${new Date().toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}</div>
+      <h1>Un seul outil pour suivre chaque commande, du mail au camion.</h1>
+      <p>Les commandes arrivent par mail, le bureau vérifie le stock et répond au client, puis le poste d'étiquetage reçoit la commande sur sa tablette. La TV de l'atelier montre en permanence ce qui reste à faire.</p>
+      <div class="row" style="margin-top:16px">
+        <button class="btn p" data-act="view" data-v="pc">Essayer la vue ordinateur</button>
+        <button class="btn" data-act="view" data-v="tab">Vue tablette</button>
+        <button class="btn" data-act="view" data-v="tv">Vue TV</button>
+      </div>
+      <p class="muted" style="font-size:13px;margin-top:14px"><span class="tag">Données fictives</span>&nbsp; Clients, stocks et commandes sont inventés pour l'essai : rien n'est relié aux fichiers ni à la messagerie du domaine.</p>
+    </div>
+    <div class="card" style="padding:18px">
+      <h3 style="font-size:18px;margin-bottom:8px">En ce moment dans la démo</h3>
+      ${presStats()}
+    </div>
+  </section>
+
+  <section class="sect">
+    <h2>Le parcours d'une commande</h2>
+    <p class="muted">Chaque étape est validée par une personne : le logiciel prépare et rappelle, mais il ne décide jamais à votre place.</p>
+    <div class="flow">
+      <div><b>1</b>Le mail du client arrive<em>Ordinateur · boîte mail</em></div>
+      <div><b>2</b>Le stock est vérifié<em>Ordinateur · arbitrage si besoin</em></div>
+      <div><b>3</b>Réponse au client<em>Ordinateur · mail prérempli</em></div>
+      <div class="fa"><b>4</b>Étiquetage et cartons<em>Tablette · poste de conditionnement</em></div>
+      <div class="fb"><b>5</b>Suivi à l'atelier<em>TV · à faire / en cours / prêt</em></div>
+      <div><b>6</b>Enlèvement réservé<em>Ordinateur · message au transporteur</em></div>
+      <div><b>7</b>Client prévenu<em>Ordinateur · mail d'expédition</em></div>
+    </div>
+  </section>
+
+  <section class="sect">
+    <h2>Trois écrans, une seule liste de commandes</h2>
+    <div class="supports">
+      <div class="card sup">
+        <div class="ill">${svgPC()}</div>
+        <h3>Ordinateur — le bureau</h3>
+        <ul><li>Mails reçus et création de la commande</li><li>Disponibilité calculée selon le stock et les réserves des clients habituels</li><li>Réponses, transporteur et notification préremplies</li></ul>
+        <button class="btn p" data-act="view" data-v="pc">Ouvrir</button>
+      </div>
+      <div class="card sup">
+        <div class="ill">${svgTab()}</div>
+        <h3>Tablette — poste d'étiquetage</h3>
+        <ul><li>Les commandes à préparer, dans l'ordre</li><li>Grosses cases à cocher : contre-étiquettes, étiquetage, cartons</li><li>Consignes du bureau, signalement d'un problème</li></ul>
+        <button class="btn p" data-act="view" data-v="tab">Ouvrir</button>
+      </div>
+      <div class="card sup">
+        <div class="ill">${svgTV()}</div>
+        <h3>TV — atelier</h3>
+        <ul><li>À étiqueter, en cours, prêtes à partir</li><li>Commandes urgentes mises en avant</li><li>Se met à jour seule, sans toucher à rien</li></ul>
+        <button class="btn p" data-act="view" data-v="tv">Ouvrir</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="sect">
+    <h2>Comment tester</h2>
+    <div class="how">
+      <div class="card" style="padding:18px 20px">
+        <ol>
+          <li>Sur l'<b>ordinateur</b>, ouvrez la vue <b>Ordinateur</b>, onglet <b>Boîte mail</b>.</li>
+          <li>Sur la <b>tablette</b>, ouvrez ce même lien (ou scannez le QR code), puis choisissez <b>Tablette</b>.</li>
+          <li>Au bureau, ouvrez un mail, cliquez sur <b>Créer la commande</b>, regardez la disponibilité, puis <b>Rédiger la réponse</b> et <b>Confirmer</b>.</li>
+          <li>La commande apparaît <b>en direct</b> sur la tablette : cochez les étapes, puis <b>Commande prête</b>.</li>
+          <li>De retour au bureau : <b>Réserver l'enlèvement</b>, puis <b>Enlevée → prévenir le client</b>.</li>
+          <li>Le bouton <b>Simuler un mail entrant</b> ajoute une nouvelle commande quand vous voulez.</li>
+        </ol>
+        <p class="muted" style="font-size:13px;margin-bottom:0">Tous les appareils qui ouvrent le lien voient la même démo. Le point vert en haut à droite indique que la synchronisation fonctionne.</p>
+      </div>
+      <div class="card share">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=8&data=${encodeURIComponent(tabLink)}" alt="QR code vers la vue tablette" onerror="this.style.display='none'">
+        <div style="min-width:0">
+          <b>Ouvrir sur la tablette</b>
+          <div class="linkbox">${esc(tabLink)}</div>
+          <div class="row"><button class="btn s" data-act="copy" data-txt="${esc(tabLink)}">Copier le lien</button></div>
+          <p class="muted" style="font-size:12.5px;margin:10px 0 0">Salle de démo : <b>${esc(SALLE)}</b> · <a href="#" data-act="salle">créer une salle privée</a> · <a href="#" data-act="reset">remettre la démo à zéro</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sect">
+    <h2>Ce que la version installée fera en plus</h2>
+    <ul class="notin">
+      <li>Lire les vrais mails reçus dans Outlook (sans changer d'adresse)</li>
+      <li>Reprendre le stock du fichier Excel du domaine</li>
+      <li>Préparer les contre-étiquettes pour BarTender (l'impression reste lancée à la main)</li>
+      <li>Tourner sur un ordinateur dédié au domaine, sans passer par Internet</li>
+      <li>Garder l'historique des commandes et des clients</li>
+      <li>Gérer les 20 à 30 habillages réels et les vrais clients</li>
+    </ul>
+    <p class="muted" style="font-size:13px">Pour cette préversion seulement, la synchronisation passe par un service public gratuit (ntfy.sh). N'y saisissez donc pas de vraies données clients.</p>
+  </section>
+  </div>`;
+}
+function presStats() {
+  const c = s => S.orders.filter(o => o.statut === s).length;
+  const nm = S.mails.filter(m => !m.traite).length;
+  const rows = [["Mails à traiter", nm], ["Nouvelles commandes", c("nouvelle")], ["En attente du client", c("attente")], ["À étiqueter / en cours", c("etiquetage") + c("encours")], ["Prêtes / enlèvement réservé", c("prete") + c("enlevement")], ["Expédiées", c("expediee")]];
+  return `<table class="t">${rows.map(r => `<tr><td>${r[0]}</td><td class="num"><b>${r[1]}</b></td></tr>`).join("")}</table>
+  <p class="muted" style="font-size:12.5px;margin:10px 0 0">Dernière action : ${esc(lastLog())}</p>`;
+}
+const svgPC = () => `<svg width="120" height="90" viewBox="0 0 120 90"><rect x="10" y="6" width="100" height="62" rx="5" fill="#3b1219"/><rect x="15" y="11" width="90" height="52" rx="2" fill="#fffdf8"/><rect x="15" y="11" width="22" height="52" fill="#efe7da"/><rect x="42" y="17" width="56" height="5" rx="2" fill="#7a1f2b"/><rect x="42" y="27" width="40" height="4" rx="2" fill="#d9cdb9"/><rect x="42" y="35" width="50" height="4" rx="2" fill="#d9cdb9"/><rect x="42" y="43" width="34" height="4" rx="2" fill="#d9cdb9"/><path d="M44 68h32l4 12H40z" fill="#3b1219"/><rect x="34" y="80" width="52" height="4" rx="2" fill="#3b1219"/></svg>`;
+const svgTab = () => `<svg width="130" height="90" viewBox="0 0 130 90"><rect x="8" y="8" width="114" height="76" rx="9" fill="#3b1219"/><rect x="15" y="15" width="100" height="62" rx="3" fill="#fffdf8"/><rect x="20" y="21" width="90" height="16" rx="3" fill="#efe7da"/><rect x="20" y="41" width="28" height="12" rx="3" fill="#2e6b3f"/><rect x="51" y="41" width="28" height="12" rx="3" fill="#2e6b3f"/><rect x="82" y="41" width="28" height="12" rx="3" fill="#fff" stroke="#d9cdb9"/><rect x="60" y="60" width="50" height="12" rx="3" fill="#7a1f2b"/></svg>`;
+const svgTV = () => `<svg width="140" height="92" viewBox="0 0 140 92"><rect x="6" y="4" width="128" height="74" rx="4" fill="#17110f"/><rect x="12" y="16" width="36" height="56" rx="3" fill="#2e2420"/><rect x="52" y="16" width="36" height="56" rx="3" fill="#2e2420"/><rect x="92" y="16" width="36" height="56" rx="3" fill="#2e2420"/><rect x="15" y="20" width="30" height="10" rx="2" fill="#7a1f2b"/><rect x="15" y="33" width="30" height="10" rx="2" fill="#7a1f2b"/><rect x="55" y="20" width="30" height="10" rx="2" fill="#b4531f"/><rect x="95" y="20" width="30" height="10" rx="2" fill="#2e6b3f"/><rect x="95" y="33" width="30" height="10" rx="2" fill="#2e6b3f"/><rect x="12" y="7" width="40" height="5" rx="2" fill="#f3ebe0"/><path d="M60 78h20l3 8H57z" fill="#17110f"/></svg>`;
+
+/* ===== Ordinateur ===== */
+function vPC() {
+  const nm = S.mails.filter(m => !m.traite).length;
+  const nn = S.orders.filter(o => o.statut === "nouvelle" || o.pb).length;
+  const ne = S.orders.filter(o => o.statut === "prete").length;
+  const tab = (id, lib, n) => `<button class="${ui.pcTab === id ? "on" : ""}" data-act="pctab" data-v="${id}">${lib}${n ? `<span class="n">${n}</span>` : ""}</button>`;
+  return `<div class="pc">
+    <aside class="side">
+      ${tab("mails", "Boîte mail", nm)}
+      ${tab("cmd", "Commandes", nn)}
+      ${tab("stock", "Stock", 0)}
+      ${tab("enl", "Enlèvements", ne)}
+      <div class="foot">Connecté en tant que <b>Bureau</b><br>Salle : ${esc(SALLE)}</div>
+    </aside>
+    <section class="pcmain">${ui.pcTab === "mails" ? pcMails() : ui.pcTab === "stock" ? pcStock() : ui.pcTab === "enl" ? pcEnl() : pcCmd()}</section>
+  </div>`;
+}
+
+function pcMails() {
+  const mails = S.mails.slice().sort((a, b) => b.recu - a.recu);
+  if (!ui.mail || !mails.find(m => m.id === ui.mail)) ui.mail = (mails.find(m => !m.traite) || mails[0] || {}).id;
+  const m = mails.find(x => x.id === ui.mail);
+  return `<div class="pchead"><h2>Boîte mail</h2><span class="muted">commandes@domaine — relevée depuis Outlook</span><span class="sp"></span><button class="btn" data-act="simmail">+ Simuler un mail entrant</button></div>
+  <div class="split">
+    <div class="card list">${mails.map(x => { const c = cli(x.client); return `<button class="li ${x.id === ui.mail ? "on" : ""} ${!x.lu ? "unread" : ""}" data-act="mail" data-id="${x.id}">
+      <div class="l1"><b>${esc(c.nom)}</b><span class="sp"></span>${x.traite ? `<span class="chip">Commande créée</span>` : ""}<span class="muted" style="font-size:12px">${fmtDT(x.recu)}</span></div>
+      <div class="l2">${esc(x.sujet)} — ${esc(x.corps.replace(/\s+/g, " ").slice(0, 90))}</div></button>`; }).join("") || `<div class="empty">Aucun mail</div>`}</div>
+    <div class="card pane">${m ? mailPane(m) : `<div class="empty">Sélectionnez un mail</div>`}</div>
+  </div>`;
+}
+function mailPane(m) {
+  const c = cli(m.client);
+  const o = m.order ? ord(m.order) : null;
+  return `<div class="row"><h3 style="font-size:20px">${esc(m.sujet)}</h3></div>
+  <div class="muted" style="font-size:13.5px;margin-top:4px">De : <b style="color:var(--ink)">${esc(c.nom)}</b> &lt;${esc(c.email)}&gt; · ${fmtDT(m.recu)} · ${c.hab ? `<span class="chip">Client habituel</span>` : `<span class="chip">Nouveau / occasionnel</span>`}</div>
+  <div class="mailbody">${esc(m.corps)}</div>
+  ${o ? `<div class="box"><b>Commande n°${o.num} créée.</b> ${badge(o.statut)} <button class="btn s" style="margin-left:8px" data-act="goorder" data-id="${o.id}">Voir la commande</button></div>` : `
+  <div class="box">
+    <h4>Lignes repérées dans le mail (vous pourrez les corriger)</h4>
+    <table class="t"><tr><th>Cuvée</th><th>Habillage</th><th class="num">Bouteilles</th><th class="num">Carton</th></tr>
+    ${m.lignes.map(l => `<tr><td>${dot(l.cuvee)} ${cuvLib(l.cuvee)}</td><td>${esc(hab(l.hab).nom)}</td><td class="num">${l.qte}</td><td class="num">${l.carton}</td></tr>`).join("")}</table>
+    <div class="row" style="margin-top:12px"><span class="muted" style="font-size:13px">Date souhaitée : ${fmtD(m.souhaitee)}</span><span class="sp"></span><button class="btn p" data-act="mkorder" data-id="${m.id}">Créer la commande</button></div>
+  </div>`}`;
+}
+
+function pcCmd() {
+  const F = { actives: o => ACTIVE_ST.includes(o.statut), nouvelle: o => o.statut === "nouvelle", attente: o => o.statut === "attente", atelier: o => ["etiquetage", "encours"].includes(o.statut), depart: o => ["prete", "enlevement"].includes(o.statut), expediee: o => ["expediee", "annulee"].includes(o.statut), toutes: () => true };
+  const list = S.orders.filter(F[ui.filtre]).sort((a, b) => FLOW.indexOf(a.statut) - FLOW.indexOf(b.statut) || (a.souhaitee < b.souhaitee ? -1 : 1));
+  if (!ui.order || !ord(ui.order)) ui.order = (list[0] || {}).id;
+  const o = ord(ui.order);
+  const fb = (id, lib) => `<button class="${ui.filtre === id ? "on" : ""}" data-act="filtre" data-v="${id}">${lib} <span class="muted">${S.orders.filter(F[id]).length}</span></button>`;
+  return `<div class="pchead"><h2>Commandes</h2><span class="sp"></span><button class="btn" data-act="neworder">+ Saisir une commande</button></div>
+  <div class="filters" style="margin-bottom:12px">${fb("actives", "En cours")}${fb("nouvelle", "Nouvelles")}${fb("attente", "Attente client")}${fb("atelier", "À l'atelier")}${fb("depart", "Départ")}${fb("expediee", "Terminées")}${fb("toutes", "Toutes")}</div>
+  <div class="split">
+    <div class="card list">${list.map(x => { const c = cli(x.client); const v = x.statut === "nouvelle" ? worst(verdict(x)) : null; return `<button class="li ${x.id === ui.order ? "on" : ""} ${flashIds.has(x.id) ? "flash" : ""}" data-act="order" data-id="${x.id}">
+      <div class="l1"><b>N°${x.num}</b> <span>${esc(c.nom)}</span><span class="sp"></span>${x.pb ? `<span class="badge" style="background:var(--red)">Problème</span>` : ""}${badge(x.statut)}</div>
+      <div class="l2">${totBt(x)} bt · ${totCartons(x)} cartons · pour le ${fmtD(x.souhaitee)}${v ? ` · <span class="${v === "ok" ? "ok" : v === "tendu" ? "warn" : "ko"}">${VLIB[v]}</span>` : ""}</div></button>`; }).join("") || `<div class="empty">Aucune commande ici</div>`}</div>
+    <div class="card pane">${o ? orderPane(o) : `<div class="empty">Sélectionnez une commande</div>`}</div>
+  </div>`;
+}
+
+function orderPane(o) {
+  const c = cli(o.client);
+  const edit = o.statut === "nouvelle" || o.statut === "attente";
+  const v = verdict(o);
+  const si = FLOW.indexOf(o.statut);
+  const stepper = `<div class="stepper">${FLOW.map((s, i) => `<div class="${i < si ? "done" : i === si ? "cur" : ""}">${ST[s].court}</div>`).join("")}</div>`;
+  const rows = o.lignes.map((l, i) => {
+    const vv = v[l.cuvee];
+    return `<tr><td>${dot(l.cuvee)} ${cuvLib(l.cuvee)}</td><td>${esc(hab(l.hab).nom)}</td><td class="num">${l.qte}</td><td class="num">${l.carton}</td>
+      <td>${edit ? `<span class="vchip ${vv.level}" title="Stock ${vv.stock} · réservé ${vv.reserve} · réserve habituels ${vv.resHab}">${VLIB[vv.level]} · ${Math.max(0, vv.dispo)} dispo</span>` : `<span class="muted">${nbCartons(l)} cartons</span>`}</td>
+      <td class="num">${edit ? `<input type="number" min="0" step="${l.carton}" value="${alloc(l)}" data-k="al-${o.id}-${i}" data-ch="alloc" data-id="${o.id}" data-i="${i}" style="width:84px">` : `<b>${alloc(l)}</b>`}</td>
+      <td>${o.statut === "nouvelle" ? `<button class="btn s" data-act="delline" data-id="${o.id}" data-i="${i}" title="Supprimer la ligne">✕</button>` : ""}</td></tr>`;
+  }).join("");
+  const w = worst(v);
+  const arb = edit && w !== "ok" ? `<div class="box ${w === "rupture" ? "alert" : "warn"}">
+    <h4>${w === "rupture" ? "Stock insuffisant : arbitrage à faire" : "Stock tendu : la commande entame la réserve des clients habituels"}</h4>
+    ${Object.entries(v).filter(([, x]) => x.level !== "ok").map(([cid, x]) => `<div style="font-size:13.5px;margin:4px 0">${dot(cid)} <b>${cuvLib(cid)}</b> : demandé ${x.demande} · stock nu ${x.stock} · déjà réservé ${x.reserve} · réserve habituels ${x.resHab}${x.attente ? ` · ${x.attente} demandés dans d'autres nouvelles commandes` : ""} → <b>${x.max} possibles</b> pour ce client</div>`).join("")}
+    <div class="row" style="margin-top:8px"><button class="btn s" data-act="maxalloc" data-id="${o.id}">Accorder le maximum possible</button><span class="muted" style="font-size:12.5px">Vous gardez la main : modifiez la colonne « Accordé » si besoin.</span></div>
+  </div>` : "";
+  const addRow = o.statut === "nouvelle" ? `<tr><td><select data-ch="add" data-f="cuvee">${S.cuvees.map(x => `<option value="${x.id}" ${ui.add.cuvee === x.id ? "selected" : ""}>${esc(x.nom)} ${x.mill}</option>`).join("")}</select></td>
+    <td><select data-ch="add" data-f="hab">${S.habs.map(x => `<option value="${x.id}" ${ui.add.hab === x.id ? "selected" : ""}>${esc(x.nom)}</option>`).join("")}</select></td>
+    <td class="num"><input type="number" min="1" value="${ui.add.qte}" data-ch="add" data-f="qte" style="width:70px"></td>
+    <td class="num"><select data-ch="add" data-f="carton">${[6, 12, 24].map(n => `<option ${+ui.add.carton === n ? "selected" : ""}>${n}</option>`).join("")}</select></td>
+    <td colspan="3"><button class="btn s" data-act="addline" data-id="${o.id}">+ Ajouter la ligne</button></td></tr>` : "";
+
+  let act = "";
+  switch (o.statut) {
+    case "nouvelle": act = `<button class="btn p" data-act="reply" data-id="${o.id}">Rédiger la réponse au client</button><button class="btn" data-act="st" data-id="${o.id}" data-v="etiquetage" data-txt="Confirmée sans attendre (client habituel) — envoyée à l'étiquetage">Confirmer directement → étiquetage</button><span class="sp"></span><button class="btn" data-act="cancel" data-id="${o.id}">Annuler</button>`; break;
+    case "attente": act = `<button class="btn p" data-act="st" data-id="${o.id}" data-v="etiquetage" data-txt="Le client a confirmé — envoyée à l'étiquetage">Le client a confirmé → envoyer à l'étiquetage</button><button class="btn" data-act="reply" data-id="${o.id}">Revoir la réponse</button><span class="sp"></span><button class="btn" data-act="cancel" data-id="${o.id}">Annuler</button>`; break;
+    case "etiquetage": case "encours": act = `<div style="flex:1;min-width:220px"><div class="row" style="font-size:13.5px"><span>Au poste d'étiquetage (tablette)</span><span class="sp"></span><b>${Math.round(progress(o) * 100)} %</b></div><div class="bar" style="margin-top:6px"><i style="width:${progress(o) * 100}%"></i></div></div><button class="btn" data-act="st" data-id="${o.id}" data-v="attente" data-txt="Reprise au bureau">Reprendre au bureau</button>`; break;
+    case "prete": act = `<button class="btn p" data-act="enl" data-id="${o.id}">Réserver l'enlèvement</button><span class="muted" style="font-size:13px">${o.colis || totCartons(o)} colis · ${o.palettes || 0} palette(s) · ~${poids(o)} kg</span>`; break;
+    case "enlevement": act = `<div style="font-size:14px">${esc(o.enl?.tr || "")} · <b>${fmtD(o.enl?.date)}</b>${o.enl?.ref ? ` · réf. ${esc(o.enl.ref)}` : ""}</div><span class="sp"></span><button class="btn" data-act="enl" data-id="${o.id}">Modifier</button><button class="btn g" data-act="ship" data-id="${o.id}">Enlevée → prévenir le client</button>`; break;
+    case "expediee": act = `<span class="muted">Commande terminée. Stock nu mis à jour.</span>`; break;
+    case "annulee": act = `<span class="muted">Commande annulée.</span><button class="btn s" data-act="st" data-id="${o.id}" data-v="nouvelle" data-txt="Commande réactivée">Réactiver</button>`; break;
+  }
+  return `<div class="row"><h3 style="font-size:22px">N°${o.num} · ${esc(c.nom)}</h3><span class="sp"></span>${badge(o.statut)}</div>
+  <div class="muted" style="font-size:13.5px;margin-top:4px">${esc(c.ville)} · ${c.hab ? "client habituel" : "client occasionnel"} · reçue ${fmtDT(o.recu)} ·
+    pour le ${edit ? `<input type="date" value="${o.souhaitee}" data-k="dt-${o.id}" data-ch="souhaitee" data-id="${o.id}" style="padding:3px 6px">` : `<b style="color:var(--ink)">${fmtD(o.souhaitee)}</b>`}</div>
+  ${o.statut !== "annulee" ? stepper : ""}
+  ${o.pb ? `<div class="box alert"><h4>Problème signalé par le poste d'étiquetage · ${fmtT(o.pb.t)}</h4><div>${esc(o.pb.txt)}</div><div style="margin-top:8px"><button class="btn s" data-act="pbok" data-id="${o.id}">Marquer comme résolu</button></div></div>` : ""}
+  <div style="overflow-x:auto;margin-top:12px"><table class="t"><tr><th>Cuvée</th><th>Habillage</th><th class="num">Demandé</th><th class="num">Carton</th><th>${edit ? "Disponibilité" : "Colis"}</th><th class="num">Accordé</th><th></th></tr>${rows}${addRow}</table></div>
+  ${arb}
+  <div style="margin-top:14px"><label class="muted" style="font-size:13px">Consignes pour le poste d'étiquetage (variantes de dernière minute…)</label>
+  <textarea rows="2" data-k="nt-${o.id}" data-ch="notes" data-id="${o.id}" placeholder="Ex. : 2 cartons à part, étiquette spéciale, palette filmée…">${esc(o.notes)}</textarea></div>
+  <div class="actions">${act}</div>
+  <details style="margin-top:14px"><summary class="muted" style="font-size:13px;cursor:pointer">Historique (${o.hist.length})</summary><ul class="hist">${o.hist.slice().reverse().map(h => `<li>${fmtDT(h.t)} — ${esc(h.txt)}</li>`).join("")}</ul></details>`;
+}
+
+function pcStock() {
+  return `<div class="pchead"><h2>Stock de bouteilles nues</h2><span class="muted">Dans la version installée : repris du fichier Excel du domaine</span></div>
+  <div class="card" style="overflow-x:auto"><table class="t">
+    <tr><th>Cuvée</th><th class="num">Stock nu</th><th class="num">Réservé</th><th class="num">Disponible</th><th class="num">Réserve habituels</th><th class="num">Libre (autres clients)</th><th class="num">Demandé (nouvelles)</th><th style="width:160px"></th></tr>
+    ${S.cuvees.map(c => { const r = reserved(c.id); const d = c.stock - r; const lib = d - c.res; const pn = pendingNew(c.id); const pct = c.stock ? Math.max(0, Math.min(100, d / c.stock * 100)) : 0;
+      return `<tr><td>${dot(c.id)} ${esc(c.nom)} ${c.mill}</td>
+      <td class="num"><input type="number" min="0" value="${c.stock}" data-k="st-${c.id}" data-ch="stock" data-id="${c.id}" data-f="stock"></td>
+      <td class="num">${r}</td><td class="num"><b class="${d < 0 ? "ko" : ""}">${d}</b></td>
+      <td class="num"><input type="number" min="0" value="${c.res}" data-k="rs-${c.id}" data-ch="stock" data-id="${c.id}" data-f="res" style="width:76px"></td>
+      <td class="num ${lib < 0 ? "ko" : lib < pn ? "warn" : ""}">${lib}</td><td class="num">${pn || "—"}</td>
+      <td><div class="bar"><i style="width:${pct}%;background:${pct < 25 ? "var(--orange)" : "var(--green)"}"></i></div></td></tr>`; }).join("")}
+  </table></div>
+  <div class="box" style="font-size:13.5px"><b>Comment lire ce tableau.</b> « Réservé » compte les bouteilles promises dans les commandes en attente de confirmation ou en préparation. La « réserve habituels » est une quantité que vous gardez de côté pour vos clients réguliers. Un nouveau client ne peut prendre que le « libre », ce qui simplifie l'arbitrage en cas de risque de rupture. Le stock nu baisse quand une commande est marquée expédiée.</div>`;
+}
+
+function pcEnl() {
+  const a = S.orders.filter(o => o.statut === "prete");
+  const b = S.orders.filter(o => o.statut === "enlevement").sort((x, y) => (x.enl?.date || "") < (y.enl?.date || "") ? -1 : 1);
+  const row = (o, btn) => `<tr><td><b>N°${o.num}</b></td><td>${esc(cli(o.client).nom)}<div class="muted" style="font-size:12.5px">${esc(cli(o.client).ville)}</div></td><td class="num">${o.colis || totCartons(o)}</td><td class="num">${o.palettes || 0}</td><td class="num">~${poids(o)} kg</td><td>${o.enl ? esc(o.enl.tr) + "<div class='muted' style='font-size:12.5px'>" + fmtD(o.enl.date) + (o.enl.ref ? " · réf. " + esc(o.enl.ref) : "") + "</div>" : `<span class="muted">pour le ${fmtD(o.souhaitee)}</span>`}</td><td>${btn}</td></tr>`;
+  const head = `<tr><th>Commande</th><th>Client</th><th class="num">Colis</th><th class="num">Palettes</th><th class="num">Poids</th><th>Transport</th><th></th></tr>`;
+  return `<div class="pchead"><h2>Enlèvements</h2><span class="muted">Les réservations se font sur le site de chaque transporteur ; ici on prépare le message et on garde la trace.</span></div>
+  <h3 style="font-size:17px;margin:6px 0 8px">Prêtes — enlèvement à réserver (${a.length})</h3>
+  <div class="card" style="overflow-x:auto"><table class="t">${head}${a.map(o => row(o, `<button class="btn s p" data-act="enl" data-id="${o.id}">Réserver</button>`)).join("") || `<tr><td colspan="7" class="muted">Rien à réserver pour l'instant.</td></tr>`}</table></div>
+  <h3 style="font-size:17px;margin:20px 0 8px">Enlèvements réservés (${b.length})</h3>
+  <div class="card" style="overflow-x:auto"><table class="t">${head}${b.map(o => row(o, `<button class="btn s g" data-act="ship" data-id="${o.id}">Enlevée</button>`)).join("") || `<tr><td colspan="7" class="muted">Aucun enlèvement réservé.</td></tr>`}</table></div>`;
+}
+
+/* ===== Tablette ===== */
+function vTab() {
+  const todo = S.orders.filter(o => o.statut === "encours" || o.statut === "etiquetage").sort((a, b) => (a.statut === "encours" ? -1 : 0) - (b.statut === "encours" ? -1 : 0) || (a.souhaitee < b.souhaitee ? -1 : 1));
+  const ready = S.orders.filter(o => o.statut === "prete").slice(-4);
+  if (!ui.tabOrder || !ord(ui.tabOrder) || !["etiquetage", "encours", "prete"].includes(ord(ui.tabOrder).statut)) ui.tabOrder = (todo[0] || {}).id;
+  const o = ord(ui.tabOrder);
+  const card = x => { const c = cli(x.client); const urg = x.souhaitee <= TODAY();
+    return `<button class="tcard ${x.id === ui.tabOrder ? "on" : ""} ${flashIds.has(x.id) ? "flash" : ""}" data-act="torder" data-id="${x.id}">
+      <div class="row"><span class="n">N°${x.num}</span><span class="sp"></span>${urg && x.statut !== "prete" ? `<span class="badge" style="background:var(--red)">Urgent</span>` : ""}${badge(x.statut)}</div>
+      <div class="c">${esc(c.nom)}</div><div class="m">${totBt(x)} bouteilles · ${totCartons(x)} cartons · pour le ${fmtD(x.souhaitee)}</div>
+      ${x.statut === "encours" ? `<div class="bar" style="margin-top:8px"><i style="width:${progress(x) * 100}%"></i></div>` : ""}</button>`; };
+  return `<div class="tab">
+    <div class="tlist"><h3>À préparer (${todo.length})</h3>${todo.map(card).join("") || `<div class="muted" style="padding:10px">Rien à préparer. Les nouvelles commandes confirmées au bureau apparaîtront ici.</div>`}
+    ${ready.length ? `<h3>Prêtes récemment</h3>${ready.map(card).join("")}` : ""}</div>
+    <div class="tdet">${o ? tabDetail(o) : `<div class="empty" style="font-size:18px">Aucune commande à préparer pour le moment.</div>`}</div>
+  </div>`;
+}
+function tabDetail(o) {
+  const c = cli(o.client);
+  const done = o.lignes.every(l => l.ce && l.et && l.ca);
+  const ro = o.statut === "prete";
+  return `<div class="row"><h2>N°${o.num} · ${esc(c.nom)}</h2><span class="sp"></span>${badge(o.statut)}</div>
+  <div class="muted" style="font-size:16px;margin-top:4px">${esc(c.ville)} · pour le <b style="color:var(--ink)">${fmtD(o.souhaitee)}</b> · ${totBt(o)} bouteilles · ${totCartons(o)} cartons</div>
+  ${o.notes ? `<div class="consigne"><b>Consignes du bureau :</b> ${esc(o.notes)}</div>` : ""}
+  ${o.pb ? `<div class="box alert" style="font-size:15px"><b>Problème signalé :</b> ${esc(o.pb.txt)} — en attente du bureau</div>` : ""}
+  ${o.statut === "etiquetage" ? `<div class="tfoot"><button class="btn p" data-act="tstart" data-id="${o.id}">▶ Commencer cette commande</button></div>` : ""}
+  ${o.lignes.map((l, i) => { const n = nbCartons(l); const ld = l.ce && l.et && l.ca;
+    const stp = (f, lib) => `<button class="tstep ${l[f] ? "on" : ""}" data-act="tstep" data-id="${o.id}" data-i="${i}" data-f="${f}" ${ro ? "disabled" : ""}>${l[f] ? "✓" : "○"} ${lib}</button>`;
+    return `<div class="tline ${ld ? "done" : ""}">
+      <div class="top"><span class="dot" style="width:18px;height:18px;margin-top:4px;background:${COUL[cuv(l.cuvee).coul]}"></span>
+        <div><div class="nm">${cuvLib(l.cuvee)}</div><div class="hb">Habillage : <b>${esc(hab(l.hab).nom)}</b></div></div>
+        <div class="q"><b>${alloc(l)} bt</b>${n} cartons de ${l.carton}</div></div>
+      <div class="tsteps">${stp("ce", "Contre-étiquettes")}${stp("et", "Bouteilles étiquetées")}${stp("ca", "Mises en cartons")}</div>
+      <div class="tsteps"><span class="muted" style="font-size:15px">Cartons faits</span><div class="cnt"><button data-act="tcnt" data-id="${o.id}" data-i="${i}" data-v="-1" ${ro ? "disabled" : ""}>−</button><b>${l.faits} / ${n}</b><button data-act="tcnt" data-id="${o.id}" data-i="${i}" data-v="1" ${ro ? "disabled" : ""}>+</button></div></div>
+    </div>`; }).join("")}
+  <div class="tline"><div class="tsteps" style="margin-top:0">
+    <span style="font-size:16px;font-weight:600">Palettes</span><div class="cnt"><button data-act="tpal" data-id="${o.id}" data-v="-1" ${ro ? "disabled" : ""}>−</button><b>${o.palettes || 0}</b><button data-act="tpal" data-id="${o.id}" data-v="1" ${ro ? "disabled" : ""}>+</button></div>
+    <span class="sp"></span><span class="muted" style="font-size:15px">Poids estimé ~${poids(o)} kg</span></div></div>
+  <div class="tfoot">
+    ${ro ? `<div class="box" style="font-size:16px;flex:1">Commande prête. Le bureau s'occupe de l'enlèvement.</div><button class="btn" data-act="treopen" data-id="${o.id}">Rouvrir</button>` : `
+    <button class="btn" data-act="tpb" data-id="${o.id}">⚠ Signaler un problème</button><span class="sp"></span>
+    <button class="btn g" data-act="tready" data-id="${o.id}" ${done ? "" : "disabled"}>✓ Commande prête</button>`}
+  </div>`;
+}
+
+/* ===== TV ===== */
+function vTV() {
+  const by = s => S.orders.filter(o => s.includes(o.statut)).sort((a, b) => a.souhaitee < b.souhaitee ? -1 : 1);
+  const A = by(["etiquetage"]), B = by(["encours"]), C = by(["prete", "enlevement"]);
+  const card = (o, mode) => { const c = cli(o.client); const urg = o.souhaitee <= TODAY() && mode !== "c";
+    return `<div class="tvcard ${flashIds.has(o.id) ? "flash" : ""}" style="border-left-color:${ST[o.statut].c}">
+      <div class="a"><b>N°${o.num}</b><span>${esc(c.nom)}</span>${urg ? `<span class="bdg">URGENT</span>` : o.pb ? `<span class="bdg">PROBLÈME</span>` : ""}</div>
+      ${mode === "c" ? `<div class="d">${o.statut === "enlevement" ? `🚚 ${esc((o.enl?.tr || "").split(" — ")[0])} · ${fmtD(o.enl?.date)}` : "Enlèvement à réserver"} · ${o.colis || totCartons(o)} colis${o.palettes ? " · " + o.palettes + " pal." : ""}</div>`
+        : `<div class="d">Pour le ${fmtD(o.souhaitee)} · ${totBt(o)} bt · ${totCartons(o)} cartons</div>${o.lignes.slice(0, 3).map(l => `<div class="ln">• ${esc(cuv(l.cuvee).nom)} — ${esc(hab(l.hab).nom)} · ${alloc(l)}</div>`).join("")}${o.lignes.length > 3 ? `<div class="ln">+ ${o.lignes.length - 3} autre(s)</div>` : ""}`}
+      ${mode === "b" ? `<div class="tvbar"><i style="width:${progress(o) * 100}%"></i></div>` : ""}</div>`; };
+  const col = (t, list, mode, color) => `<div class="tvcol"><h2><span class="dot" style="width:1vw;height:1vw;background:${color};border:0"></span>${t}<span class="k">${list.length}</span></h2>${list.map(o => card(o, mode)).join("") || `<div class="tvempty">Rien pour l'instant</div>`}</div>`;
+  const now = new Date();
+  return `<div class="tv">
+    <div class="tvhead"><div><h1>Domaine de la Rossignole</h1><div class="sub">Atelier · étiquetage et conditionnement</div></div>
+      <div class="tvclock"><b id="tvclock">${now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</b><span>${now.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}</span></div></div>
+    <div class="tvcols">${col("À étiqueter", A, "a", ST.etiquetage.c)}${col("En cours", B, "b", ST.encours.c)}${col("Prêtes à partir", C, "c", ST.prete.c)}</div>
+    <div class="tvfoot">${S.log.slice(-4).reverse().map(l => `<span><b>${fmtT(l.t)}</b> ${esc(l.txt)}</span>`).join("") || "<span>En attente d'activité…</span>"}</div>
+  </div>`;
+}
+setInterval(() => { const el = $("#tvclock"); if (el) el.textContent = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }); }, 5000);
+let topTimer; document.addEventListener("mousemove", e => { if (ui.view !== "tv") return; if (e.clientY < 90) { document.body.classList.add("showtop"); clearTimeout(topTimer); topTimer = setTimeout(() => document.body.classList.remove("showtop"), 2500); } });
+document.addEventListener("touchstart", e => { if (ui.view !== "tv") return; document.body.classList.add("showtop"); clearTimeout(topTimer); topTimer = setTimeout(() => document.body.classList.remove("showtop"), 4000); }, { passive: true });
+
+/* ===== Modale, toast, copie ===== */
+function modal(html) { $("#mbox").innerHTML = html; $("#modal").classList.add("on"); }
+function closeModal() { $("#modal").classList.remove("on"); }
+$("#modal").addEventListener("click", e => { if (e.target.id === "modal") closeModal(); });
+let toastT; function toast(t) { const el = $("#toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove("on"), 2600); }
+function copy(t) {
+  const done = () => toast("Copié dans le presse-papiers");
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(done, () => fallbackCopy(t, done)); else fallbackCopy(t, done);
+}
+function fallbackCopy(t, done) { const ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); done(); } catch (e) {} ta.remove(); }
+
+function mailModal(title, to, subject, body, confirmLabel, onConfirm) {
+  modal(`<h3>${esc(title)}</h3>
+    <label>À</label><input type="text" value="${esc(to)}" readonly style="width:100%">
+    <label>Objet</label><input type="text" id="mSubj" value="${esc(subject)}" style="width:100%">
+    <label>Message</label><textarea id="mBody" rows="12">${esc(body)}</textarea>
+    <p class="muted" style="font-size:12.5px">Dans la version installée, le message s'ouvrira directement dans Outlook. Ici, vous pouvez le copier ou l'ouvrir dans votre messagerie.</p>
+    <div class="actions"><button class="btn" data-act="mcopy">Copier le texte</button><a class="btn" id="mMailto" href="#" target="_blank" rel="noopener">Ouvrir dans la messagerie</a><span class="sp"></span><button class="btn" data-act="mclose">Fermer</button><button class="btn p" data-act="mok">${esc(confirmLabel)}</button></div>`);
+  const upd = () => { $("#mMailto").href = "mailto:" + encodeURIComponent(to) + "?subject=" + encodeURIComponent($("#mSubj").value) + "&body=" + encodeURIComponent($("#mBody").value); };
+  upd(); $("#mSubj").oninput = upd; $("#mBody").oninput = upd;
+  modalOk = onConfirm;
+}
+let modalOk = null;
+const SIGN = "\n\nBien cordialement,\nDomaine de la Rossignole\nSancerre · Menetou-Salon";
+function lignesTxt(o, withDispo) {
+  return o.lignes.map(l => { const a = alloc(l); const base = `- ${cuv(l.cuvee).nom} ${cuv(l.cuvee).mill} (${hab(l.hab).nom}) : `;
+    if (!withDispo) return base + `${a} bouteilles, ${nbCartons(l)} cartons de ${l.carton}`;
+    return base + (a >= l.qte ? `${l.qte} bouteilles — disponible` : a === 0 ? `${l.qte} demandées — malheureusement plus disponible pour le moment` : `${l.qte} demandées — ${a} bouteilles disponibles`); }).join("\n");
+}
+
+/* ===== Actions ===== */
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-act],[data-view]"); if (!b) return;
+  if (b.dataset.view) { setView(b.dataset.view); return; }
+  const act = b.dataset.act, id = b.dataset.id, i = +b.dataset.i, v = b.dataset.v;
+  if (b.tagName === "A" && act) e.preventDefault();
+  const o = id ? ord(id) : null;
+  switch (act) {
+    case "view": setView(v); break;
+    case "copy": copy(b.dataset.txt); break;
+    case "pctab": ui.pcTab = v; render(true); break;
+    case "mail": ui.mail = id; { const m = S.mails.find(x => x.id === id); if (m && !m.lu) emit("mail_lu", { id }); else render(true); } break;
+    case "goorder": ui.pcTab = "cmd"; ui.order = id; ui.filtre = "toutes"; render(true); break;
+    case "filtre": ui.filtre = v; ui.order = null; render(true); break;
+    case "order": ui.order = id; render(true); break;
+    case "simmail": { const m = genMail(); emit("mail_new", { mail: m }); ui.pcTab = "mails"; ui.mail = m.id; render(true); toast("Nouveau mail reçu de " + cli(m.client).nom); break; }
+    case "mkorder": { const m = S.mails.find(x => x.id === id); if (!m) break; const oid = "o" + uid(); emit("order_create", { order: { id: oid, client: m.client, souhaitee: m.souhaitee, lignes: m.lignes, mail: m.id } }); ui.pcTab = "cmd"; ui.filtre = "actives"; ui.order = oid; render(true); toast("Commande créée — vérifiez la disponibilité"); break; }
+    case "neworder": newOrderModal(); break;
+    case "delline": emit("line_del", { id, i }); break;
+    case "addline": if (!+ui.add.qte) { toast("Indiquez une quantité"); break; } emit("line_add", { id, line: Object.assign({}, ui.add) }); break;
+    case "maxalloc": { const vv = verdict(o); const left = {}; for (const k in vv) left[k] = vv[k].max;
+      o.lignes.forEach((l, j) => { const a = Math.min(l.qte, Math.max(0, left[l.cuvee])); const ar = Math.floor(a / l.carton) * l.carton || a; left[l.cuvee] -= ar; if (ar !== alloc(l)) emit("line_patch", { id, i: j, patch: { alloc: ar } }); });
+      emit("order_patch", { id, patch: {}, txt: "Arbitrage : quantités accordées ajustées au disponible" }); break; }
+    case "reply": { const c = cli(o.client); const full = o.lignes.every(l => alloc(l) >= l.qte);
+      mailModal("Réponse au client", c.email, `Votre commande n°${o.num} — disponibilités`,
+        `Bonjour,\n\nMerci pour votre commande. ${full ? "Tout est disponible :" : "Voici ce que nous pouvons vous proposer :"}\n\n${lignesTxt(o, true)}\n\nLa commande pourra être prête pour le ${fmtD(o.souhaitee)}.\nMerci de nous confirmer ${full ? "votre commande" : "si cette proposition vous convient"}.` + SIGN,
+        o.statut === "nouvelle" ? "J'ai envoyé la réponse" : "OK", () => { if (o.statut === "nouvelle") { emit("mailout", { id, kind: "réponse au client" }); emit("statut", { id, statut: "attente", txt: "Réponse envoyée au client — en attente de confirmation" }); } }); break; }
+    case "st": emit("statut", { id, statut: v, txt: b.dataset.txt }); if (v === "etiquetage") toast("Envoyée au poste d'étiquetage"); break;
+    case "cancel": modal(`<h3>Annuler la commande n°${o.num} ?</h3><p>Les bouteilles réservées redeviennent disponibles.</p><div class="actions"><span class="sp"></span><button class="btn" data-act="mclose">Non</button><button class="btn p" data-act="mok">Oui, annuler</button></div>`); modalOk = () => emit("statut", { id, statut: "annulee", txt: "Commande annulée" }); break;
+    case "pbok": emit("pb", { id, txt: null }); break;
+    case "enl": enlModal(o); break;
+    case "ship": { const c = cli(o.client);
+      mailModal("Prévenir le client de l'expédition", c.email, `Votre commande n°${o.num} est en route`,
+        `Bonjour,\n\nVotre commande n°${o.num} a été remise au transporteur (${(o.enl?.tr || "").split(" — ")[0]}) le ${fmtD(o.enl?.date || TODAY())}${o.enl?.ref ? `, référence ${o.enl.ref}` : ""}.\n\n${lignesTxt(o, false)}\n\nSoit ${o.colis || totCartons(o)} colis${o.palettes ? ` sur ${o.palettes} palette(s)` : ""}.` + SIGN,
+        "Enlevée et client prévenu", () => { emit("mailout", { id, kind: "avis d'expédition" }); emit("statut", { id, statut: "expediee", txt: "Enlevée par le transporteur — client prévenu" }); }); break; }
+    /* tablette */
+    case "torder": ui.tabOrder = id; render(true); break;
+    case "tstart": emit("statut", { id, statut: "encours", txt: "Préparation commencée au poste d'étiquetage" }); break;
+    case "tstep": { const l = o.lignes[i]; const f = b.dataset.f; const patch = { [f]: !l[f] }; if (f === "ca") patch.faits = !l[f] ? nbCartons(l) : l.faits;
+      if (o.statut === "etiquetage") emit("statut", { id, statut: "encours", txt: "Préparation commencée au poste d'étiquetage" });
+      emit("line_patch", { id, i, patch }); break; }
+    case "tcnt": { const l = o.lignes[i]; const n = nbCartons(l); const f = Math.max(0, Math.min(n, l.faits + (+v))); const patch = { faits: f }; if (f === n && !l.ca) patch.ca = true; if (f < n && l.ca) patch.ca = false;
+      if (o.statut === "etiquetage") emit("statut", { id, statut: "encours", txt: "Préparation commencée au poste d'étiquetage" });
+      emit("line_patch", { id, i, patch }); break; }
+    case "tpal": emit("order_patch", { id, patch: { palettes: Math.max(0, (o.palettes || 0) + (+v)) } }); break;
+    case "tready": emit("order_patch", { id, patch: { colis: totCartons(o) } }); emit("statut", { id, statut: "prete", txt: "Commande prête au conditionnement" }); toast("Le bureau est prévenu"); break;
+    case "treopen": emit("statut", { id, statut: "encours", txt: "Rouverte au poste d'étiquetage" }); break;
+    case "tpb": modal(`<h3>Signaler un problème — N°${o.num}</h3><label>Qu'est-ce qui ne va pas ?</label><textarea id="pbTxt" rows="3" placeholder="Ex. : manque d'étiquettes Clos des Remparts, carton abîmé…"></textarea>
+      <div class="row" style="margin-top:8px">${["Manque d'étiquettes", "Manque de cartons", "Bouteilles manquantes", "Erreur d'habillage"].map(t => `<button class="btn s" data-act="pbq" data-txt="${t}">${t}</button>`).join("")}</div>
+      <div class="actions"><span class="sp"></span><button class="btn" data-act="mclose">Annuler</button><button class="btn p" data-act="mok">Envoyer au bureau</button></div>`);
+      modalOk = () => { const t = $("#pbTxt").value.trim(); if (t) { emit("pb", { id, txt: t }); toast("Problème envoyé au bureau"); } }; break;
+    case "pbq": $("#pbTxt").value = b.dataset.txt; break;
+    /* modale */
+    case "mclose": closeModal(); break;
+    case "mok": { const f = modalOk; modalOk = null; if (f && f() === false) break; closeModal(); break; }
+    case "mcopy": copy($("#mSubj").value + "\n\n" + $("#mBody").value); break;
+    case "tcopy": copy($("#tBody").value); break;
+    /* présentation */
+    case "salle": { const s = Math.random().toString(36).slice(2, 7); location.href = location.pathname + "?salle=" + s + "#pres"; break; }
+    case "reset": modal(`<h3>Remettre la démo à zéro ?</h3><p>Toutes les commandes et mails ajoutés seront effacés, sur <b>tous les appareils</b> de la salle « ${esc(SALLE)} ».</p><div class="actions"><span class="sp"></span><button class="btn" data-act="mclose">Annuler</button><button class="btn p" data-act="mok">Remettre à zéro</button></div>`); modalOk = () => { emit("reset", {}); toast("Démo réinitialisée"); }; break;
+  }
+});
+document.addEventListener("change", e => {
+  const el = e.target; const ch = el.dataset.ch; if (!ch) return;
+  const id = el.dataset.id;
+  switch (ch) {
+    case "alloc": { const o = ord(id); const i = +el.dataset.i; const val = Math.max(0, Math.min(o.lignes[i].qte, Math.round(+el.value || 0))); emit("line_patch", { id, i, patch: { alloc: val } }); break; }
+    case "souhaitee": emit("order_patch", { id, patch: { souhaitee: el.value }, txt: "Date souhaitée : " + fmtD(el.value) }); break;
+    case "notes": emit("order_patch", { id, patch: { notes: el.value }, txt: "Consignes modifiées" }); break;
+    case "stock": { const val = Math.max(0, Math.round(+el.value || 0)); emit("stock", { id, patch: { [el.dataset.f]: val } }); break; }
+    case "add": ui.add[el.dataset.f] = el.value; if (el.dataset.f === "carton" || el.dataset.f === "qte") ui.add[el.dataset.f] = +el.value; break;
+  }
+});
+
+function enlModal(o) {
+  const c = cli(o.client); const e0 = o.enl || {}; const colis = o.colis || totCartons(o);
+  const txt = () => `Bonjour,\n\nNous avons une expédition prête au Domaine de la Rossignole :\n\n- Commande : n°${o.num}\n- Destinataire : ${c.nom}, ${c.ville}\n- Colis : ${colis} cartons${o.palettes ? `, sur ${o.palettes} palette(s)` : ""}\n- Poids estimé : ${poids(o)} kg\n- Enlèvement souhaité : ${fmtD($("#eDate") ? $("#eDate").value : e0.date || plusJ(1))}\n\nMerci de nous confirmer le passage.` + SIGN;
+  modal(`<h3>Enlèvement — commande n°${o.num}</h3>
+    <div class="grid2">
+      <div><label>Transporteur</label><select id="eTr">${S.transp.map(t => `<option ${e0.tr === t ? "selected" : ""}>${esc(t)}</option>`).join("")}</select></div>
+      <div><label>Date d'enlèvement</label><input type="date" id="eDate" value="${e0.date || plusJ(1)}"></div>
+      <div><label>Référence de réservation</label><input type="text" id="eRef" value="${esc(e0.ref || "")}" placeholder="donnée par le site du transporteur"></div>
+      <div><label>Colis · palettes · poids</label><input type="text" value="${colis} colis · ${o.palettes || 0} pal. · ~${poids(o)} kg" readonly></div>
+    </div>
+    <label>Message de confirmation pour le transporteur</label><textarea id="tBody" rows="9">${esc(txt())}</textarea>
+    <p class="muted" style="font-size:12.5px">La réservation se fait toujours sur le site du transporteur. Notez ici la référence obtenue pour garder la trace.</p>
+    <div class="actions"><button class="btn" data-act="tcopy">Copier le message</button><span class="sp"></span><button class="btn" data-act="mclose">Fermer</button><button class="btn p" data-act="mok">Enregistrer l'enlèvement</button></div>`);
+  $("#eDate").onchange = () => { $("#tBody").value = txt(); };
+  modalOk = () => { const enl = { tr: $("#eTr").value, date: $("#eDate").value, ref: $("#eRef").value.trim() };
+    emit("order_patch", { id: o.id, patch: { enl, colis }, txt: `Enlèvement : ${enl.tr.split(" — ")[0]} le ${fmtD(enl.date)}${enl.ref ? " (réf. " + enl.ref + ")" : ""}` });
+    if (o.statut === "prete") emit("statut", { id: o.id, statut: "enlevement", txt: "Enlèvement réservé" }); };
+}
+function newOrderModal() {
+  modal(`<h3>Saisir une commande (reçue par téléphone, sur un salon…)</h3>
+    <div class="grid2"><div><label>Client</label><select id="nCli">${S.clients.map(c => `<option value="${c.id}">${esc(c.nom)} — ${esc(c.ville)}</option>`).join("")}</select></div>
+    <div><label>Pour le</label><input type="date" id="nDate" value="${plusJ(5)}"></div></div>
+    <p class="muted" style="font-size:13px">Vous ajouterez les lignes de commande juste après.</p>
+    <div class="actions"><span class="sp"></span><button class="btn" data-act="mclose">Annuler</button><button class="btn p" data-act="mok">Créer</button></div>`);
+  modalOk = () => { const oid = "o" + uid(); emit("order_create", { order: { id: oid, client: $("#nCli").value, souhaitee: $("#nDate").value, lignes: [] } }); ui.pcTab = "cmd"; ui.filtre = "actives"; ui.order = oid; render(true); };
+}
+
+/* ---------- mails simulés ---------- */
+function genMail() {
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  const k = pick(S.clients);
+  const n = 1 + Math.floor(Math.random() * 3);
+  const cuvs = S.cuvees.slice().sort(() => Math.random() - .5).slice(0, n);
+  const habFor = { k1: "h3", k2: "h4", k3: "h5", k5: "h2" };
+  const lignes = cuvs.map(c => { const carton = k.pro ? pick([6, 12, 12]) : 6; const qte = carton * (k.pro ? pick([2, 4, 5, 10, 20]) : pick([1, 2])); return { cuvee: c.id, hab: habFor[k.id] || "h1", qte, carton }; });
+  const j = 3 + Math.floor(Math.random() * 8);
+  const intro = pick(["Bonjour,\n\nPouvez-vous nous préparer :", "Bonjour,\n\nJe souhaiterais commander :", "Bonjour,\n\nVoici notre commande :", "Bonjour,\n\nPour notre prochain réassort, il nous faudrait :"]);
+  const corps = `${intro}\n${lignes.map(l => `- ${l.qte} bouteilles de ${cuv(l.cuvee).nom} ${cuv(l.cuvee).mill} (cartons de ${l.carton})`).join("\n")}\n\nIdéalement pour le ${fmtD(plusJ(j))}.\n\nMerci d'avance,\n${k.nom}`;
+  return { id: "m" + uid(), client: k.id, sujet: pick(["Commande", "Nouvelle commande", "Réassort", "Demande de disponibilité"]) + " — " + k.nom, corps, lignes, souhaitee: plusJ(j) };
+}
+
+/* ---------- démarrage ---------- */
+rebuild();
+render(true);
+setSync("wait");
+connect();
+flush();
+setInterval(() => { if (!pendingRender && ui.view !== "pc") render(); }, 60000);
+</script>
+</body>
+</html>
