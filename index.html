@@ -27,7 +27,7 @@ h1,h2,h3{font-family:var(--sans);font-weight:700;letter-spacing:-.01em;margin:0}
 #top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:14px;padding:10px 24px;background:#fff;color:var(--ink);border-bottom:1px solid var(--line)}
 #top .brand{display:flex;align-items:center;gap:10px;min-width:0}
 #top .brand b{font-size:17px;white-space:nowrap}
-.brandlogo{height:40px;width:auto;display:block}
+.brandlogo{height:54px;width:auto;display:block}
 #top .brand .sep{padding-left:14px;border-left:1px solid var(--line);font-size:13px;color:var(--muted);line-height:1.3}
 #top .brand small{font-size:12px;white-space:nowrap}
 .logo{width:30px;height:30px;flex:none}
@@ -68,7 +68,7 @@ input[type=number]{width:90px}
 .hero h1{font-size:38px;line-height:1.1;color:var(--wine-d)}
 .hero .kicker{text-transform:uppercase;letter-spacing:.14em;font-size:12px;color:var(--gold);font-weight:700;margin-bottom:10px}
 .hero p{font-size:17px;color:#3D3F3A}
-.heroimg{display:flex;align-items:flex-end;gap:10px;margin-bottom:14px}.heroimg img{height:120px;width:auto}.heroimg:empty{display:none}
+.heroimg{display:flex;align-items:flex-end;gap:14px;margin:-18px -18px 16px;padding:18px 22px 0;background:var(--soft);border-radius:var(--r) var(--r) 0 0;overflow:hidden}.heroimg img{height:210px;width:auto;margin-bottom:-6px}.heroimg img.lg{height:auto;width:46%;align-self:center;margin:0 0 20px}.heroimg:empty{display:none}
 .tag{display:inline-block;background:#FBEFD9;color:#6E4300;border-radius:6px;padding:3px 9px;font-size:13px;font-weight:600}
 .flow{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin:14px 0 6px}
 .flow div{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 10px;position:relative;font-size:13.5px}
@@ -277,12 +277,12 @@ function SEED() {
       { id: "c1", nom: "Sancerre blanc", mill: 2025, coul: "blanc", stock: 1800, res: 360, kg: 1.3 },
       { id: "c2", nom: "Sancerre blanc « Nuit d’Hector »", mill: 2022, coul: "blanc", stock: 300, res: 96, kg: 1.3 },
       { id: "c3", nom: "Sancerre blanc « L’Essentiel »", mill: 2025, coul: "blanc", stock: 240, res: 48, kg: 1.35 },
-      { id: "c4", nom: "Sancerre rouge « Grand Picot »", mill: 2023, coul: "rouge", stock: 720, res: 120, kg: 1.3 },
+      { id: "c4", nom: "Sancerre rouge", mill: 2024, coul: "rouge", stock: 720, res: 120, kg: 1.3 },
       { id: "c5", nom: "Sancerre rosé", mill: 2025, coul: "rose", stock: 600, res: 120, kg: 1.3 },
       { id: "c6", nom: "Menetou-Salon blanc", mill: 2025, coul: "blanc", stock: 1200, res: 240, kg: 1.3 },
       { id: "c7", nom: "Menetou-Salon rouge", mill: 2024, coul: "rouge", stock: 480, res: 96, kg: 1.3 },
-      { id: "c8", nom: "Menetou-Salon rosé", mill: 2024, coul: "rose", stock: 360, res: 72, kg: 1.3 },
-      { id: "c9", nom: "Sancerre blanc Magnum", mill: 2024, coul: "blanc", stock: 90, res: 18, kg: 2.6 }
+      { id: "c8", nom: "Sancerre blanc « Grand Picot »", mill: 2024, coul: "blanc", stock: 360, res: 72, kg: 1.3 },
+      { id: "c9", nom: "Sancerre rouge « Grand Picot »", mill: 2023, coul: "rouge", stock: 240, res: 48, kg: 1.3 }
     ],
     habs: [
       { id: "h1", nom: "Cherrier Frères" },
@@ -305,13 +305,13 @@ function SEED() {
     mails: [
       { id: "m1", client: "k7", sujet: "Commande pour fin de mois", recu: ago(48), lu: false, traite: false, souhaitee: plusJ(7),
         corps: "Bonjour,\n\nPour notre carte d'hiver, pourriez-vous nous préparer :\n- 120 bouteilles de Sancerre blanc 2025\n- 60 bouteilles de Sancerre rouge Grand Picot 2023\n\nEn cartons de 6 s'il vous plaît, pour une livraison avant le " + fmtD(plusJ(7)) + ".\n\nBien cordialement,\nLe sommelier — Hôtel du Lac",
-        lignes: [{ cuvee: "c1", hab: "h1", qte: 120, carton: 6 }, { cuvee: "c4", hab: "h1", qte: 60, carton: 6 }] },
+        lignes: [{ cuvee: "c1", hab: "h1", qte: 120, carton: 6 }, { cuvee: "c9", hab: "h1", qte: 60, carton: 6 }] },
       { id: "m2", client: "k4", sujet: "Réassort Nuit d’Hector", recu: ago(95), lu: false, traite: false, souhaitee: plusJ(4),
         corps: "Bonjour,\n\nLes Nuit d’Hector partent très bien, je voudrais 360 bouteilles (cartons de 12) et 60 bouteilles de L’Essentiel en cartons de 6.\n\nMerci de me dire ce qui est possible.\n\nThomas — Vins & Co",
         lignes: [{ cuvee: "c2", hab: "h1", qte: 360, carton: 12 }, { cuvee: "c3", hab: "h1", qte: 60, carton: 6 }] },
       { id: "m3", client: "k6", sujet: "Vin pour une fête de famille", recu: ago(240), lu: true, traite: false, souhaitee: plusJ(10),
-        corps: "Bonjour,\n\nNous fêtons les 60 ans de mon mari. Je souhaiterais 12 bouteilles de Menetou-Salon rouge et 6 bouteilles de rosé.\nJe peux passer les chercher au domaine.\n\nMerci beaucoup,\nCatherine Martin",
-        lignes: [{ cuvee: "c7", hab: "h1", qte: 12, carton: 6 }, { cuvee: "c8", hab: "h1", qte: 6, carton: 6 }] }
+        corps: "Bonjour,\n\nNous fêtons les 60 ans de mon mari. Je souhaiterais 12 bouteilles de Menetou-Salon rouge et 6 bouteilles de Sancerre rosé.\nJe peux passer les chercher au domaine.\n\nMerci beaucoup,\nCatherine Martin",
+        lignes: [{ cuvee: "c7", hab: "h1", qte: 12, carton: 6 }, { cuvee: "c5", hab: "h1", qte: 6, carton: 6 }] }
     ],
     orders: [
       mkOrder("o1", 1041, "k1", "etiquetage", plusJ(1), ago(60 * 26), [L("c1", "h3", 120, 6), L("c4", "h1", 60, 6)], "Mettre 2 cartons de dégustation à part (étiquette standard)."),
@@ -539,7 +539,7 @@ function vPres() {
       <p class="muted" style="font-size:13px;margin-top:14px"><span class="tag">Données fictives</span>&nbsp; Clients, stocks et commandes sont inventés pour l'essai : rien n'est relié aux fichiers ni à la messagerie du domaine.</p>
     </div>
     <div class="card" style="padding:18px">
-      <div class="heroimg"><img src="img/logo.png" alt="Cherrier Frères" style="height:56px" onerror="this.remove()"><span class="sp"></span><img src="img/bouteille-blanc.png" alt="" onerror="this.remove()"><img src="img/bouteille-rouge.png" alt="" onerror="this.remove()"></div>
+      <div class="heroimg"><img class="lg" src="img/logo.png" alt="Cherrier Frères" onerror="this.remove()"><span class="sp"></span><img src="img/bouteille-blanc.png" alt="" onerror="this.remove()"><img src="img/bouteille-rouge.png" alt="" onerror="this.remove()"></div>
       <h3 style="font-size:18px;margin-bottom:8px">En ce moment dans la démo</h3>
       ${presStats()}
     </div>
@@ -617,7 +617,7 @@ function vPres() {
       <li>Préparer les contre-étiquettes pour BarTender (l'impression reste lancée à la main)</li>
       <li>Tourner sur un ordinateur dédié au domaine, sans passer par Internet</li>
       <li>Garder l'historique des commandes et des clients</li>
-      <li>Gérer les 20 à 30 habillages réels et les vrais clients</li>
+      <li>Gérer les 20 à 30 habillages réels, les vrais clients et le stock des 9 cuvées</li>
     </ul>
     <p class="muted" style="font-size:13px">Pour cette préversion seulement, la synchronisation passe par un service public gratuit (ntfy.sh). N'y saisissez donc pas de vraies données clients.</p>
   </section>
@@ -630,9 +630,9 @@ function presStats() {
   return `<table class="t">${rows.map(r => `<tr><td>${r[0]}</td><td class="num"><b>${r[1]}</b></td></tr>`).join("")}</table>
   <p class="muted" style="font-size:12.5px;margin:10px 0 0">Dernière action : ${esc(lastLog())}</p>`;
 }
-const svgPC = () => `<svg width="120" height="90" viewBox="0 0 120 90"><rect x="10" y="6" width="100" height="62" rx="5" fill="#3b1219"/><rect x="15" y="11" width="90" height="52" rx="2" fill="#fffdf8"/><rect x="15" y="11" width="22" height="52" fill="var(--soft)"/><rect x="42" y="17" width="56" height="5" rx="2" fill="#7a1f2b"/><rect x="42" y="27" width="40" height="4" rx="2" fill="#d9cdb9"/><rect x="42" y="35" width="50" height="4" rx="2" fill="#d9cdb9"/><rect x="42" y="43" width="34" height="4" rx="2" fill="#d9cdb9"/><path d="M44 68h32l4 12H40z" fill="#3b1219"/><rect x="34" y="80" width="52" height="4" rx="2" fill="#3b1219"/></svg>`;
-const svgTab = () => `<svg width="130" height="90" viewBox="0 0 130 90"><rect x="8" y="8" width="114" height="76" rx="9" fill="#3b1219"/><rect x="15" y="15" width="100" height="62" rx="3" fill="#fffdf8"/><rect x="20" y="21" width="90" height="16" rx="3" fill="var(--soft)"/><rect x="20" y="41" width="28" height="12" rx="3" fill="#2e6b3f"/><rect x="51" y="41" width="28" height="12" rx="3" fill="#2e6b3f"/><rect x="82" y="41" width="28" height="12" rx="3" fill="#fff" stroke="#d9cdb9"/><rect x="60" y="60" width="50" height="12" rx="3" fill="#7a1f2b"/></svg>`;
-const svgTV = () => `<svg width="140" height="92" viewBox="0 0 140 92"><rect x="6" y="4" width="128" height="74" rx="4" fill="#17110f"/><rect x="12" y="16" width="36" height="56" rx="3" fill="#1F211D"/><rect x="52" y="16" width="36" height="56" rx="3" fill="#1F211D"/><rect x="92" y="16" width="36" height="56" rx="3" fill="#1F211D"/><rect x="15" y="20" width="30" height="10" rx="2" fill="#7a1f2b"/><rect x="15" y="33" width="30" height="10" rx="2" fill="#7a1f2b"/><rect x="55" y="20" width="30" height="10" rx="2" fill="#b4531f"/><rect x="95" y="20" width="30" height="10" rx="2" fill="#2e6b3f"/><rect x="95" y="33" width="30" height="10" rx="2" fill="#2e6b3f"/><rect x="12" y="7" width="40" height="5" rx="2" fill="#F5F2EC"/><path d="M60 78h20l3 8H57z" fill="#17110f"/></svg>`;
+const svgPC = () => `<svg width="120" height="90" viewBox="0 0 120 90"><rect x="10" y="6" width="100" height="62" rx="5" fill="#2B2A26"/><rect x="15" y="11" width="90" height="52" rx="2" fill="#FFFFFF"/><rect x="15" y="11" width="22" height="52" fill="var(--soft)"/><rect x="42" y="17" width="56" height="5" rx="2" fill="#7A4E2D"/><rect x="42" y="27" width="40" height="4" rx="2" fill="#E3E1DA"/><rect x="42" y="35" width="50" height="4" rx="2" fill="#E3E1DA"/><rect x="42" y="43" width="34" height="4" rx="2" fill="#E3E1DA"/><path d="M44 68h32l4 12H40z" fill="#2B2A26"/><rect x="34" y="80" width="52" height="4" rx="2" fill="#2B2A26"/></svg>`;
+const svgTab = () => `<svg width="130" height="90" viewBox="0 0 130 90"><rect x="8" y="8" width="114" height="76" rx="9" fill="#2B2A26"/><rect x="15" y="15" width="100" height="62" rx="3" fill="#FFFFFF"/><rect x="20" y="21" width="90" height="16" rx="3" fill="var(--soft)"/><rect x="20" y="41" width="28" height="12" rx="3" fill="#1E6B33"/><rect x="51" y="41" width="28" height="12" rx="3" fill="#1E6B33"/><rect x="82" y="41" width="28" height="12" rx="3" fill="#fff" stroke="#E3E1DA"/><rect x="60" y="60" width="50" height="12" rx="3" fill="#7A4E2D"/></svg>`;
+const svgTV = () => `<svg width="140" height="92" viewBox="0 0 140 92"><rect x="6" y="4" width="128" height="74" rx="4" fill="#141512"/><rect x="12" y="16" width="36" height="56" rx="3" fill="#1F211D"/><rect x="52" y="16" width="36" height="56" rx="3" fill="#1F211D"/><rect x="92" y="16" width="36" height="56" rx="3" fill="#1F211D"/><rect x="15" y="20" width="30" height="10" rx="2" fill="#7A4E2D"/><rect x="15" y="33" width="30" height="10" rx="2" fill="#7A4E2D"/><rect x="55" y="20" width="30" height="10" rx="2" fill="#4F3590"/><rect x="95" y="20" width="30" height="10" rx="2" fill="#1E6B33"/><rect x="95" y="33" width="30" height="10" rx="2" fill="#1E6B33"/><rect x="12" y="7" width="40" height="5" rx="2" fill="#F5F2EC"/><path d="M60 78h20l3 8H57z" fill="#141512"/></svg>`;
 
 /* ===== Ordinateur ===== */
 function vPC() {
@@ -656,7 +656,7 @@ function pcMails() {
   const mails = S.mails.slice().sort((a, b) => b.recu - a.recu);
   if (!ui.mail || !mails.find(m => m.id === ui.mail)) ui.mail = (mails.find(m => !m.traite) || mails[0] || {}).id;
   const m = mails.find(x => x.id === ui.mail);
-  return `<div class="pchead"><h2>Boîte mail</h2><span class="muted">commandes@domaine — relevée depuis Outlook</span><span class="sp"></span><button class="btn" data-act="simmail">+ Simuler un mail entrant</button></div>
+  return `<div class="pchead"><h2>Boîte mail</h2><span class="muted">cherrierfreres@orange.fr — relevée depuis Outlook</span><span class="sp"></span><button class="btn" data-act="simmail">+ Simuler un mail entrant</button></div>
   <div class="split">
     <div class="card list">${mails.map(x => { const c = cli(x.client); return `<button class="li ${x.id === ui.mail ? "on" : ""} ${!x.lu ? "unread" : ""}" data-act="mail" data-id="${x.id}">
       <div class="l1"><b>${esc(c.nom)}</b><span class="sp"></span>${x.traite ? `<span class="chip">Commande créée</span>` : ""}<span class="muted" style="font-size:12px">${fmtDT(x.recu)}</span></div>
